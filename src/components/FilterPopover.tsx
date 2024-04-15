@@ -14,6 +14,7 @@ interface Props<TOption extends BaseOptionType> {
   optionRender?: SelectProps["optionRender"];
   renederTips?: () => ReactNode;
   onApply: (param?: TOption) => void;
+  SelectProps?: SelectProps<any, TOption>;
 }
 
 const FilterPopover = <TOption extends BaseOptionType>({
@@ -23,6 +24,7 @@ const FilterPopover = <TOption extends BaseOptionType>({
   onApply,
   renederTips = () => null,
   optionRender,
+  SelectProps = {},
 }: Props<TOption>) => {
   const [open, setOpen] = useState(false);
   const [currentOption, setCurrent] = useState<TOption | undefined>();
@@ -44,8 +46,9 @@ const FilterPopover = <TOption extends BaseOptionType>({
 
   return (
     <Popover
+      arrow={false}
       content={
-        <Space className=" p-3" direction="vertical">
+        <Space className=" p-2" direction="vertical">
           <Space direction="horizontal" className="max-w-[200px]">
             {renederTips()}
           </Space>
@@ -62,7 +65,7 @@ const FilterPopover = <TOption extends BaseOptionType>({
                 console.log({ option });
                 setCurrent(option as TOption);
               }}
-
+              {...SelectProps}
               // filterOption={filterOption}
             />
             <Button onClick={onApplyHandler} type="primary">

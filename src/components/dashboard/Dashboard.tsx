@@ -18,23 +18,16 @@ import dayjs, { Dayjs } from "dayjs";
 import React, { FC, useEffect, useState } from "react";
 import ReactCountryFlag from "react-country-flag";
 import FilterPopover from "../FilterPopover";
-import { Country, SearchOutput } from "country-code-lookup";
 import { useCallback } from "react";
 import { useMemo } from "react";
 import Title from "antd/es/typography/Title";
+import Text from "antd/es/typography/Text";
 
 interface Props {
   data: IData[];
   AffiliateList: string[];
   CountryList: string[];
 }
-
-// Affiliate: 'Affiliate',
-//         Country: 'Country',
-//         Date_UTC: 'Date',
-//         Deposits: 'Deposits',
-//         Leads: 'Leads',
-//         Conversion_Rate: 'Conversion Rate'
 
 const defaultDate = {
   start: dayjs().subtract(3, "M"),
@@ -69,11 +62,41 @@ const Dashboard: FC<Props> = ({ data, CountryList, AffiliateList }) => {
     Affiliate: useCallback(
       () =>
         filters.Affiliate.map((name) => {
-          return <Tag>{name}</Tag>;
+          return (
+            <Tag
+              closable
+              onClose={() =>
+                setFilters((prev) => ({
+                  ...prev,
+                  Affiliate: prev.Affiliate.filter((c) => c !== name),
+                }))
+              }
+            >
+              {name}
+            </Tag>
+          );
         }),
       [filters.Affiliate],
     ),
-    country: [],
+    country: useCallback(
+      () =>
+        filters.country.map((iso2) => {
+          return (
+            <Tag
+              closable
+              onClose={() =>
+                setFilters((prev) => ({
+                  ...prev,
+                  country: prev.country.filter((c) => c !== iso2),
+                }))
+              }
+            >
+              {<ReactCountryFlag svg countryCode={iso2} />}
+            </Tag>
+          );
+        }),
+      [filters.country],
+    ),
   };
 
   const filtredData = useMemo(() => {
@@ -177,9 +200,17 @@ const Dashboard: FC<Props> = ({ data, CountryList, AffiliateList }) => {
       </Space>
       <Space className=" w-full " direction="vertical">
         <Space direction="vertical">
-          <Space direction="horizontal">
+          <Space direction="vertical">
             <Space>
-              <Button className="border-red" icon={<ReloadOutlined />} />
+              <Button
+                onClick={() => {
+                  setFilters({
+                    Affiliate: [],
+                    country: [],
+                  });
+                }}
+                icon={<ReloadOutlined />}
+              />
               <DatePicker.RangePicker
                 minDate={dayjs().subtract(1, "year")}
                 maxDate={defaultDate.end}
@@ -198,6 +229,7 @@ const Dashboard: FC<Props> = ({ data, CountryList, AffiliateList }) => {
               />
             </Space>
             <Space>
+              <Text>Filters</Text>
               <FilterPopover
                 isActive={!!filters.Affiliate.length}
                 buttonLabel="Affiliate"
@@ -226,7 +258,16 @@ const Dashboard: FC<Props> = ({ data, CountryList, AffiliateList }) => {
               <FilterPopover
                 isActive={!!filters.country.length}
                 buttonLabel="Country"
+                SelectProps={{
+                  labelRender: ({ value }) => (
+                    <Space>
+                      <ReactCountryFlag countryCode={value as string} svg />
+                      {value}
+                    </Space>
+                  ),
+                }}
                 key="country"
+                renederTips={renerFilter.country}
                 optionRender={({ value }) => {
                   return (
                     <Space>
