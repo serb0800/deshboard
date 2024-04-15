@@ -9,7 +9,8 @@ export async function authenticate(
   "use server";
 
   try {
-    await signIn("credentials", formData);
+   const res = await signIn("credentials", formData);
+   console.log(res)
   } catch (error) {
     if (isRedirectError(error)) {
       throw error;
