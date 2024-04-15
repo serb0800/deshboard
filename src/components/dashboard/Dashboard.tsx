@@ -1,16 +1,31 @@
-'use client'
+"use client";
 
-import { IData } from '@/types'
-import { ReloadOutlined } from '@ant-design/icons'
-import { Button, Space, Table, TableProps, Typography, DatePicker } from 'antd'
-import dayjs, { Dayjs } from 'dayjs'
-import React, { FC, useEffect, useState } from 'react'
-import ReactCountryFlag from 'react-country-flag'
-const lookup = require('country-code-lookup')
-
+import { IData, IFilter, IFilterParam } from "@/types";
+import { PlusCircleOutlined, ReloadOutlined } from "@ant-design/icons";
+import {
+  Button,
+  Space,
+  Table,
+  TableProps,
+  Typography,
+  DatePicker,
+  Tag,
+  Flex,
+  Select,
+} from "antd";
+import { Content } from "antd/es/layout/layout";
+import dayjs, { Dayjs } from "dayjs";
+import React, { FC, useEffect, useState } from "react";
+import ReactCountryFlag from "react-country-flag";
+import FilterPopover from "../FilterPopover";
+import { Country, SearchOutput } from "country-code-lookup";
+import { useCallback } from "react";
+import { useMemo } from "react";
 
 interface Props {
-    data: IData[]
+  data: IData[];
+  AffiliateList: string[];
+  CountryList: string[];
 }
 
 // Affiliate: 'Affiliate',
@@ -20,94 +35,313 @@ interface Props {
 //         Leads: 'Leads',
 //         Conversion_Rate: 'Conversion Rate'
 
+const defaultDate = {
+  start: dayjs().subtract(3, "M"),
+  end: dayjs(),
+};
 
-const Dashboard:FC<Props> = ({ data }) => {
+type GroupCol =
+  | keyof Pick<IData, "Affiliate" | "Country" | "Date_UTC">
+  | "Date";
+const groupedCols: GroupCol[] = ["Date", "Affiliate", "Country"];
 
-    const [] = useState()
-    
-    const columns: TableProps<IData>['columns'] = [
-        {
-            title: 'Country',
-            dataIndex: 'Country',
-            key: 'Country',
-            render: (text) => <Typography.Text><ReactCountryFlag countryCode={lookup.byCountry(text).iso2} svg /> {lookup.byCountry(text).iso2}</Typography.Text>,
-            sorter: (a,b) => a.Country.localeCompare(b.Country)
+const Dashboard: FC<Props> = ({ data, CountryList, AffiliateList }) => {
+  const [ActiveGrouped, setGroupes] = useState<GroupCol[]>([
+    "Date",
+    "Affiliate",
+    "Country",
+  ]);
+  const [range, setRange] = useState<{
+    start: Dayjs | undefined | null;
+    end: Dayjs | undefined | null;
+  }>(() => {
+    return {
+      start: defaultDate.start,
+      end: defaultDate.end,
+    };
+  });
+  const [filters, setFilters] = useState<IFilter>({
+    Affiliate: [],
+    country: [],
+  });
+  const renerFilter = {
+    Affiliate: useCallback(
+      () =>
+        filters.Affiliate.map((name) => {
+          return <Tag>{name}</Tag>;
+        }),
+      [filters.Affiliate],
+    ),
+    country: [],
+  };
+
+  const filtredData = useMemo(() => {
+    console.log({ filters });
+    const isActiveFilter = Boolean(
+      filters.Affiliate.length + filters.country.length > 0,
+    );
+    if (!isActiveFilter) return data;
+    return data.filter(({ Affiliate, country }) => {
+      return (
+        filters.Affiliate.includes(Affiliate) ||
+        filters.country.includes(country.iso2)
+      );
+    });
+  }, [data, filters.Affiliate, filters.country, range.end, range.start]);
+
+  const onRemoveFilter = useCallback(
+    (object: keyof IFilter, removeVal: string) => {
+      setFilters((prev) => ({
+        ...prev,
+        [object]: prev[object].filter((val) => val !== removeVal),
+      }));
+    },
+    [],
+  );
+  const columns: TableProps<IData>["columns"] = useMemo(() => {
+    return [
+      {
+        title: "Date",
+        dataIndex: "Date_UTC",
+        key: "Date_UTC",
+        render: (text) => (
+          <p>{new Date(text as string).toLocaleDateString()}</p>
+        ),
+        sorter: (a, b) => {
+          return Date.parse(a.Date_UTC) - Date.parse(b.Date_UTC);
         },
-        {
-            title: 'Affiliate',
-            dataIndex: 'Affiliate',
-            key: 'Affiliate',
-            sorter: (a,b) => a.Affiliate.localeCompare(b.Affiliate)
+      },
+      {
+        title: "Country",
+        dataIndex: "Country",
+        key: "Country",
+        render: (_, { country }) =>
+          country?.iso2 && (
+            <Typography.Text>
+              <ReactCountryFlag countryCode={country.iso2} svg /> {country.iso2}
+            </Typography.Text>
+          ),
+        sorter: (a, b) => a.Country.localeCompare(b.Country),
+      },
+      {
+        title: "Affiliate",
+        dataIndex: "Affiliate",
+        key: "Affiliate",
+        sorter: (a, b) => a.Affiliate.localeCompare(b.Affiliate),
+      },
+      {
+        title: "Deposits",
+        dataIndex: "Deposits",
+        key: "Deposits",
+        sorter: (a, b) => {
+          if (
+            typeof a.Deposits === "string" &&
+            typeof b.Deposits === "string"
+          ) {
+            return parseInt(a.Deposits) - parseInt(b.Deposits);
+          }
+          return a.Deposits - b.Deposits;
         },
-        {
-            title: 'Deposits',
-            dataIndex: 'Deposits',
-            key: 'Deposits',
-            sorter: (a,b) => {
-               if ( typeof a.Deposits === 'string' && typeof b.Deposits === 'string') {
-                return  parseInt(a.Deposits) - parseInt(b.Deposits)
-               }
-               return a.Deposits - b.Deposits
-            }
+      },
+      {
+        title: "Leads",
+        dataIndex: "Leads",
+        key: "Leads",
+        sorter: (a, b) => {
+          if (typeof a.Leads === "string" && typeof b.Leads === "string") {
+            return parseInt(a.Leads) - parseInt(b.Leads);
+          }
+          return a.Leads - b.Leads;
         },
-        {
-            title: 'Date_UTC',
-            dataIndex: 'Date_UTC',
-            key: 'Date_UTC',
-            render: (text) => <p>{new Date(text as string).toLocaleDateString()}</p>,
-            sorter: (a,b) => {
-                return Date.parse(a.Date_UTC) - Date.parse(b.Date_UTC)
-             }
+      },
+      {
+        title: "Conversion Rate",
+        dataIndex: "Conversion_Rate",
+        key: "Conversion_Rate",
+        render: (val) => `${val}%`,
+        sorter: (a, b) => {
+          return a.Conversion_Rate - b.Conversion_Rate;
         },
-        {
-            title: 'Leads',
-            dataIndex: 'Leads',
-            key: 'Leads',
-            sorter: (a,b) => {
-                if ( typeof a.Leads === 'string' && typeof b.Leads === 'string') {
-                 return  parseInt(a.Leads) - parseInt(b.Leads)
-                }
-                return a.Leads - b.Leads
-             }
-        },
-        {
-            title: 'Conversion_Rate',
-            dataIndex: 'Conversion_Rate',
-            key: 'Conversion_Rate',
-            render: (val,) => `${val}%`,
-            sorter: (a,b) => {
-                return a.Conversion_Rate - b.Conversion_Rate
-             }
-        },
-        
-    ]
-    useEffect(() => {
-           console.log(data)
-    }, [])
-    return (
-        <Space className='p-6' direction='vertical'>
+      },
+    ];
+  }, []);
+
+  useEffect(() => {
+    console.log(data);
+  }, []);
+  return (
+    <Content>
+      <Space className="p-6 w-full " direction="vertical">
+        <Space direction="vertical">
+          <Space direction="horizontal">
             <Space>
-                <Space>
-                    <Button icon={<ReloadOutlined />}/>
-                    <DatePicker.RangePicker
-                        minDate={dayjs().subtract(3, 'y')}
-                        maxDate={dayjs().add(1,'d')}
-                        onChange={(dates, dateStrings) => {
-                            console.log({dates, dateStrings})
-                        }}
-                     />
-                </Space>
+              <Button className="border-red" icon={<ReloadOutlined />} />
+              <DatePicker.RangePicker
+                minDate={dayjs().subtract(1, "year")}
+                maxDate={defaultDate.end}
+                format={{
+                  type: "mask",
+                  format: "DD-MM-YYYY",
+                }}
+                value={[range.start, range.end]}
+                onChange={(dates, dateStrings) => {
+                  setRange({
+                    start: dates ? dates[0] : undefined,
+                    end: dates ? dates[1] : undefined,
+                  });
+                  console.log({ dates, dateStrings, d: dayjs().millisecond });
+                }}
+              />
             </Space>
-            <Table
-                dataSource={data.map((d) => ({
-                    ...d,
-                    Conversion_Rate: Math.round(((d.Deposits * 100) / d.Leads)*100)/100
+            <Space>
+              <FilterPopover
+                isActive={!!filters.Affiliate.length}
+                buttonLabel="Affiliate"
+                key="Affiliate"
+                options={AffiliateList.map((name, i) => ({
+                  value: name,
+                  label: name,
+                  key: i,
                 }))}
-                columns={columns}
-                
+                renederTips={renerFilter.Affiliate}
+                onApply={(option) => {
+                  console.log(option);
+                  if (option?.value) {
+                    setFilters((prev) => {
+                      const Affiliate = new Set<string>(prev.Affiliate).add(
+                        option.value,
+                      );
+                      return {
+                        ...prev,
+                        Affiliate: Array.from(Affiliate),
+                      };
+                    });
+                  }
+                }}
+              />
+              <FilterPopover
+                isActive={!!filters.country.length}
+                buttonLabel="Country"
+                key="country"
+                optionRender={({ value }) => {
+                  return (
+                    <Space>
+                      <ReactCountryFlag countryCode={value as string} svg />
+                      {value}
+                    </Space>
+                  );
+                }}
+                options={CountryList.map((iso2, i) => {
+                  return {
+                    value: iso2,
+                    label: iso2,
+                    key: i,
+                  };
+                })}
+                onApply={(option) => {
+                  console.log(option);
+                  if (option?.value) {
+                    setFilters((prev) => {
+                      const country = new Set<string>(prev.country).add(
+                        option.value,
+                      );
+                      return {
+                        ...prev,
+                        country: Array.from(country),
+                      };
+                    });
+                  }
+                }}
+              />
+            </Space>
+          </Space>
+          <Space direction="horizontal">
+            {ActiveGrouped.map((col, i) => (
+              <Select
+                className="min-w-2"
+                allowClear={i > 0}
+                onChange={(val) => {
+                  setGroupes((prev) => [...prev.filter((n) => col !== n), val]);
+                }}
+                onClear={() => {
+                  setGroupes((prev) => prev.filter((name) => name !== col));
+                }}
+                options={groupedCols
+                  .filter((n) => !ActiveGrouped.includes(n))
+                  .map((name) => ({
+                    label: name,
+                    value: name,
+                    disabled: ActiveGrouped.includes(name),
+                  }))}
+              />
+            ))}
+            <Button
+              onClick={() => {
+                const unused = groupedCols.filter((name) => {
+                  return !ActiveGrouped.includes(name);
+                });
+                const el = unused[0];
+                if (!el) return;
+                setGroupes((prev) => {
+                  return [...prev, el];
+                });
+              }}
+              icon={<PlusCircleOutlined />}
             />
+          </Space>
+          <Space>
+            {filters.country.map((iso2, i) => (
+              <Tag
+                onClose={() => onRemoveFilter("country", iso2)}
+                key={i + "c"}
+                closable
+              >
+                <ReactCountryFlag countryCode={iso2} svg />
+              </Tag>
+            ))}
+            {filters.Affiliate.map((name, i) => (
+              <Tag
+                onClose={() => onRemoveFilter("Affiliate", name)}
+                key={i + "a"}
+                closable
+              >
+                {name}
+              </Tag>
+            ))}
+          </Space>
         </Space>
-    )
-}
+        <Table
+          virtual
+          className="max-h-[200px]"
+          dataSource={filtredData.filter(({ date_ms }) => {
+            let res = true;
 
-export default Dashboard
+            // if (range.start && range.end) {
+            //   console.log("date", [
+            //     range.start.format("DD/MM/YYYY"),
+            //     range.end.format("DD/MM/YYYY"),
+            //     range.start.valueOf(),
+            //     range.end.format("DD/MM/YYYY"),
+            //   ]);
+            //   return (
+            //     range.start.millisecond() <= date_ms &&
+            //     date_ms <= range.end.millisecond()
+            //   );
+            // }
+
+            if (range.start) {
+              res = range.start.valueOf() <= date_ms;
+            }
+            if (range.end) {
+              res = range.end.valueOf() >= date_ms;
+            }
+            return res;
+          })}
+          columns={columns}
+        />
+      </Space>
+    </Content>
+  );
+};
+
+export default Dashboard;
