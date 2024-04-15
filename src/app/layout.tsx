@@ -16,37 +16,39 @@ const RootLayout = ({ children, ...props }: React.PropsWithChildren) => {
   console.log(props);
   return (
     <html lang="en">
-      <body className="min-h-[100vh] w-[100vw]">
-        <AntdRegistry>
-          <Layout className="w-full h-[100vh]">
-            <Sider trigger={null} collapsible collapsed={true}>
-              <div className="demo-logo-vertical" />
-              <Menu
-                theme="dark"
-                mode="inline"
-                defaultSelectedKeys={["1"]}
-                items={[
-                  {
-                    key: "1",
-                    icon: <UserOutlined />,
-                    label: <Link href="/dashboard">Dashboard</Link>,
-                  },
-                  {
-                    key: "2",
-                    icon: <VideoCameraOutlined />,
-                    label: "nav 2",
-                  },
-                  {
-                    key: "3",
-                    icon: <UploadOutlined />,
-                    label: "nav 3",
-                  },
-                ]}
-              />
-            </Sider>
-            <Layout>{children}</Layout>
-          </Layout>
-        </AntdRegistry>
+      <body className=" w-[100vw]">
+        <div className="flex">
+          <AntdRegistry>
+            <Layout className="w-full h-max">
+              {/* <Sider trigger={null} collapsible collapsed={true}>
+                <div className="demo-logo-vertical" />
+                <Menu
+                  theme="dark"
+                  mode="inline"
+                  defaultSelectedKeys={["1"]}
+                  items={[
+                    {
+                      key: "1",
+                      icon: <UserOutlined />,
+                      label: <Link href="/dashboard">Dashboard</Link>,
+                    },
+                    {
+                      key: "2",
+                      icon: <VideoCameraOutlined />,
+                      label: "nav 2",
+                    },
+                    {
+                      key: "3",
+                      icon: <UploadOutlined />,
+                      label: "nav 3",
+                    },
+                  ]}
+                />
+              </Sider> */}
+              <Layout>{children}</Layout>
+            </Layout>
+          </AntdRegistry>
+        </div>
       </body>
     </html>
   );

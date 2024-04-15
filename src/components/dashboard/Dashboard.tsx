@@ -21,6 +21,7 @@ import FilterPopover from "../FilterPopover";
 import { Country, SearchOutput } from "country-code-lookup";
 import { useCallback } from "react";
 import { useMemo } from "react";
+import Title from "antd/es/typography/Title";
 
 interface Props {
   data: IData[];
@@ -170,8 +171,11 @@ const Dashboard: FC<Props> = ({ data, CountryList, AffiliateList }) => {
     console.log(data);
   }, []);
   return (
-    <Content>
-      <Space className="p-6 w-full " direction="vertical">
+    <Content className="p-6 overflow-hidden">
+      <Space>
+        <Title>Report Admin</Title>
+      </Space>
+      <Space className=" w-full " direction="vertical">
         <Space direction="vertical">
           <Space direction="horizontal">
             <Space>
@@ -258,6 +262,7 @@ const Dashboard: FC<Props> = ({ data, CountryList, AffiliateList }) => {
           <Space direction="horizontal">
             {ActiveGrouped.map((col, i) => (
               <Select
+                key={i}
                 className="min-w-2"
                 allowClear={i > 0}
                 onChange={(val) => {
@@ -268,7 +273,8 @@ const Dashboard: FC<Props> = ({ data, CountryList, AffiliateList }) => {
                 }}
                 options={groupedCols
                   .filter((n) => !ActiveGrouped.includes(n))
-                  .map((name) => ({
+                  .map((name, i) => ({
+                    key: i,
                     label: name,
                     value: name,
                     disabled: ActiveGrouped.includes(name),
@@ -311,23 +317,9 @@ const Dashboard: FC<Props> = ({ data, CountryList, AffiliateList }) => {
           </Space>
         </Space>
         <Table
-          virtual
-          className="max-h-[200px]"
+          // className="max-h-[200px]"
           dataSource={filtredData.filter(({ date_ms }) => {
             let res = true;
-
-            // if (range.start && range.end) {
-            //   console.log("date", [
-            //     range.start.format("DD/MM/YYYY"),
-            //     range.end.format("DD/MM/YYYY"),
-            //     range.start.valueOf(),
-            //     range.end.format("DD/MM/YYYY"),
-            //   ]);
-            //   return (
-            //     range.start.millisecond() <= date_ms &&
-            //     date_ms <= range.end.millisecond()
-            //   );
-            // }
 
             if (range.start) {
               res = range.start.valueOf() <= date_ms;

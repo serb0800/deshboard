@@ -2,7 +2,9 @@ import { getData } from "@/actions/actions";
 import Dashboard from "@/components/dashboard/Dashboard";
 import { NextPage } from "next";
 
-import { Content } from "antd/es/layout/layout";
+import { Content, Header } from "antd/es/layout/layout";
+import Title from "antd/es/typography/Title";
+import Space from "antd/es/space";
 
 interface Props {}
 
