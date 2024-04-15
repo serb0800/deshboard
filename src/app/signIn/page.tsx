@@ -6,7 +6,7 @@ import { Content } from "antd/es/layout/layout";
 const SignInPage: NextPage = () => {
   return (
     <Content className="w-full">
-      <SignInForm sauthenticate={authenticate} />;
+      <SignInForm authenticate={authenticate} />;
     </Content>
   );
 };

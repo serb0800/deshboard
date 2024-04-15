@@ -8,7 +8,7 @@ import {
 import { Form, Input, Button, Col, Row, Typography } from "antd";
 import { useFormState, useFormStatus } from "react-dom";
 
-export default function SignInForm({ authenticate }) {
+export default function SignInForm({ authenticate }:{authenticate: any}) {
   const [errorMessage, dispatch] = useFormState(authenticate, undefined);
 
   return (
