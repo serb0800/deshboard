@@ -12,9 +12,12 @@ import Link from "antd/es/typography/Link";
 import Menu from "antd/es/menu/menu";
 import Sider from "antd/es/layout/Sider";
 
-interface Props {}
+interface Props {
+  searchParams: {date?: string}
+}
 
-const Page: NextPage<Props> = async ({}) => {
+const Page: NextPage<Props> = async (props) => {
+  console.log(props)
   const { data, AffiliateList, CountryList } = await getData();
   return (
     <>

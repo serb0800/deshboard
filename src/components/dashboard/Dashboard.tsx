@@ -41,7 +41,7 @@ const groupedCols: GroupCol[] = ["Date", "Affiliate", "Country"];
 
 const Dashboard: FC<Props> = ({ data, CountryList, AffiliateList }) => {
   const [ActiveGrouped, setGroupes] = useState<GroupCol[]>([
-    "Date",
+    // "Date",
     "Affiliate",
     "Country",
   ]);

@@ -10,7 +10,7 @@ export async function authenticate(
 
   try {
    const res = await signIn("credentials", formData);
-   console.log(res)
+  //  console.log(res)
   } catch (error) {
     if (isRedirectError(error)) {
       throw error;
