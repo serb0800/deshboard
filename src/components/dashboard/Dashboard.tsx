@@ -301,6 +301,40 @@ const Dashboard: FC<Props> = ({ data, CountryList, AffiliateList }) => {
             </Space>
           </Space>
           <Space direction="horizontal">
+  {ActiveGrouped.map((col, i) => (
+    <Select
+      key={`select-${i}`}
+      className="min-w-2"
+      style={{ minWidth: '120px' }} // Пример установки минимальной ширины
+      allowClear={i > 0}
+      onChange={(val) => {
+        setGroupes((prev) => [...prev.filter((n) => col !== n), val]);
+      }}
+      onClear={() => {
+        setGroupes((prev) => prev.filter((name) => name !== col));
+      }}
+      options={groupedCols
+        .filter((n) => !ActiveGrouped.includes(n))
+        .map((name, index) => ({
+          key: `option-${index}`,
+          label: name,
+          value: name,
+          disabled: ActiveGrouped.includes(name),
+        }))
+      }
+    />
+  ))}
+  <Button
+    onClick={() => {
+      const unused = groupedCols.filter((name) => !ActiveGrouped.includes(name));
+      const el = unused[0];
+      if (!el) return;
+      setGroupes((prev) => [...prev, el]);
+    }}
+    icon={<PlusCircleOutlined />}
+  />
+</Space>
+          {/* <Space direction="horizontal">
             {ActiveGrouped.map((col, i) => (
               <Select
                 key={i}
@@ -335,7 +369,7 @@ const Dashboard: FC<Props> = ({ data, CountryList, AffiliateList }) => {
               }}
               icon={<PlusCircleOutlined />}
             />
-          </Space>
+          </Space> */}
           <Space>
             {filters.country.map((iso2, i) => (
               <Tag

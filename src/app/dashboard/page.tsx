@@ -1,29 +1,34 @@
 import { getData } from "@/actions/actions";
 import Dashboard from "@/components/dashboard/Dashboard";
 import { NextPage } from "next";
-
-import Layout, { Content, Header } from "antd/es/layout/layout";
-import Title from "antd/es/typography/Title";
-import Space from "antd/es/space";
+import Layout, { Content } from "antd/es/layout/layout";
 import UploadOutlined from "@ant-design/icons/lib/icons/UploadOutlined";
 import VideoCameraOutlined from "@ant-design/icons/lib/icons/VideoCameraOutlined";
 import DashboardOutlined from "@ant-design/icons/lib/icons/DashboardOutlined";
 import Link from "antd/es/typography/Link";
 import Menu from "antd/es/menu/menu";
 import Sider from "antd/es/layout/Sider";
-
+import styles from "./Sider.module.css"; // Импорт CSS модуля
+import LogoSVG from "@/components/LogoSvg";
 interface Props {
-  searchParams: {date?: string}
+  searchParams: { date?: string };
 }
 
 const Page: NextPage<Props> = async (props) => {
-  console.log(props)
+  console.log(props);
   const { data, AffiliateList, CountryList } = await getData();
   return (
     <>
       <Layout className="w-full h-max">
-        <Sider trigger={null} collapsible collapsed={true}>
-          <div className="demo-logo-vertical" />
+        <Sider
+          className={styles.siderCustom}
+          width={250}
+          trigger={null}
+          collapsible={false}
+        >
+          <div className={styles.logoContainer}>
+            <LogoSVG />
+          </div>
           <Menu
             theme="dark"
             mode="inline"

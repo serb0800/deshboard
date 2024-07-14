@@ -1,0 +1,16 @@
+.siderCustom {
+    display: flex;
+    flex-direction: column;
+    width: 300px !important; /* !important чтобы переопределить любые другие стили */
+    background-color: #001529;
+    min-height: 100vh; /* Устанавливаем минимальную высоту */
+  }
+  
+  .logoContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80px;
+    padding: 20px 0;
+  }
+  
