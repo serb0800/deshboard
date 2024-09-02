@@ -1,11 +1,21 @@
 export const countryNameToCode: Record<string, string> = {
-    "United States": "US",
-    "Canada": "CA",
-    "Germany": "DE",
+    "Mexico": "MX",
+    "Ecuador": "EC",
+    "Chilie": "CL",
+    "Uruguay": "UY",
+    "Dominican Republic": "DO",
+    "Peru": "PE",
+    "Costa Rica": "CR",
+    "Guatemala": "GT",
+    "Colombia": "CO",
     "France": "FR",
     "United Kingdom": "GB",
-    "Russia": "RU",
-    "China": "CN",
+    "Canada": "CA",
+    "Australia": "AU",
+    "Philipines": "PHL",
     "Japan": "JP",
-    // Добавьте другие страны по необходимости
-  };
+    "India": "IN",
+    "Turkey": "TR",
+    "Norway": "NO",
+    "Sweden": "SE",
+};

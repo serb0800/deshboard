@@ -6,12 +6,11 @@ import {
   Button,
   Space,
   Table,
-  TableProps,
   Typography,
   DatePicker,
   Tag,
-  Flex,
   Select,
+  Grid
 } from "antd";
 import { Content } from "antd/es/layout/layout";
 import dayjs, { Dayjs } from "dayjs";
@@ -24,30 +23,26 @@ import Title from "antd/es/typography/Title";
 import Text from "antd/es/typography/Text";
 import { getListReport, groupByKey, GroupedData } from "@/actions/request";
 import { ActionType, ProColumns, ProTable } from "@ant-design/pro-components";
-import { SortOrder } from 'antd/es/table/interface';
-import { countryNameToCode } from '@/app/lib/contryNameToCode';
 import axios from 'axios';
+import { countryNameToCode } from '@/app/lib/contryNameToCode';
 
-interface Props {
- 
-}
+interface Props {}
 
-const defaultDate = {
-  start: dayjs().subtract(3, "M"),
-  end: dayjs(),
-};
+// const defaultDate = {
+//   start: dayjs().subtract(3, "M"),
+//   end: dayjs(),
+// };
 
 interface IGroupByOption {
   label: string,
   value: groupByKey
 }
 
-
 const groupedCols: IGroupByOption[] = [
-    { label: 'Day', value: 'day' },
-    { label: 'Affiliate', value: 'affiliateId' },
-    { label: 'Advertiser', value: 'advertiserId' },
-    { label: 'Country', value: 'country' },
+  { label: 'Day', value: 'day' },
+  { label: 'Affiliate', value: 'affiliateId' },
+  { label: 'Advertiser', value: 'advertiserId' },
+  { label: 'Country', value: 'country' },
 ]
 
 interface IEnums {
@@ -57,41 +52,42 @@ interface IEnums {
 }
 
 const Dashboard: FC<Props> = () => {
-  const actionRef:Ref<ActionType | undefined> = useRef()
+  const actionRef: Ref<ActionType | undefined> = useRef();
   const [ActiveGrouped, setGroupes] = useState<groupByKey[]>([
     "day",
-    // "Affiliate",
-    // "Country",
+    "affiliateId",
+    "country",
   ]);
   const [enums, setEnums] = useState<IEnums>({
     advertisers: [],
     affiliates: [],
     countries: []
-  })
+  });
 
-  useEffect(() => {
-    (async () => {
-      const data = await axios('api/enums')
-      setEnums(data.data)
-    })()
-  },[])
-  
   const [range, setRange] = useState<{
     start: Dayjs | undefined | null;
     end: Dayjs | undefined | null;
   }>(() => {
     return {
-      start: defaultDate.start,
-      end: defaultDate.end,
+      start: undefined,
+      end: undefined,
     };
   });
+
   const [filter, setFilters] = useState<IFilter>({
-   advertiserIds: [],
-   affiliateIds: [],
-   country: [],
-   isTest: false,
-  //  timeframe: [dayjs().subtract(1, 'month').toISOString(),dayjs().toISOString()]
+    advertiserIds: [],
+    affiliateIds: [],
+    country: [],
+    isTest: false,
   });
+
+  useEffect(() => {
+    (async () => {
+      const data = await axios('api/enums');
+      setEnums(data.data);
+    })();
+  }, []);
+
   const renerFilter = {
     Affiliate: useCallback(
       () =>
@@ -133,15 +129,15 @@ const Dashboard: FC<Props> = () => {
     ),
   };
 
-  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
- useEffect(() => {
-  (async () => {
-    setIsLoading(true)
-    
-    setIsLoading(false)
-  })
- }, [])
+  useEffect(() => {
+    (async () => {
+      setIsLoading(true);
+      // Fetching or other logic
+      setIsLoading(false);
+    })();
+  }, []);
 
   const onRemoveFilter = useCallback(
     (object: keyof IFilter, removeVal: string) => {
@@ -152,6 +148,7 @@ const Dashboard: FC<Props> = () => {
     },
     [],
   );
+
   const columns: ProColumns<GroupedData>[] = useMemo(() => {
     return [
       {
@@ -215,263 +212,222 @@ const Dashboard: FC<Props> = () => {
   }, [ActiveGrouped]);
 
   useEffect(() => {
-    actionRef.current?.reload()
-  },[ActiveGrouped, Object.values(filter)])
-  return (
-      <Content className="p-6 overflow-hidden">
-          <Space>
-              <Title>Statistic</Title>
-          </Space>
-          <Space className=" w-full " direction="vertical">
-              <Space direction="vertical">
-                  <Space direction="vertical">
-                      <Space>
-                          <Button
-                              onClick={() => {
-                                  setFilters({
-                                      affiliateIds: [],
-                                      country: [],
-                                      advertiserIds: [],
-                                      isTest: false,
-                                  })
-                              }}
-                              icon={<ReloadOutlined />}
-                          />
-                          <DatePicker.RangePicker
-                              minDate={dayjs().subtract(1, 'year')}
-                              maxDate={defaultDate.end}
-                              format={{
-                                  type: 'mask',
-                                  format: 'DD-MM-YYYY',
-                              }}
-                              value={[range.start, range.end]}
-                              onChange={(dates, dateStrings) => {
-                                  setRange({
-                                      start: dates ? dates[0] : undefined,
-                                      end: dates ? dates[1] : undefined,
-                                  })
-                                  console.log({
-                                      dates,
-                                      dateStrings,
-                                      d: dayjs().millisecond,
-                                  })
-                              }}
-                          />
-                      </Space>
-                      <Space>
-                          <Text>Filters</Text>
-                          <FilterPopover
-                              isActive={!!filter?.affiliateIds?.length}
-                              buttonLabel="Affiliate"
-                              key="Affiliate"
-                              options={enums.affiliates.map((name, i) => ({
-                                  value: name,
-                                  label: name,
-                                  key: i,
-                              }))}
-                              renederTips={renerFilter.Affiliate}
-                              onApply={(option) => {
-                                  console.log(option)
-                                  if (option?.value) {
-                                      setFilters((prev) => {
-                                          const Affiliate = new Set<string>(
-                                              prev.affiliateIds
-                                          ).add(option.value)
-                                          return {
-                                              ...prev,
-                                              affiliateIds: Array.from(Affiliate),
-                                          }
-                                      })
-                                  }
-                              }}
-                          />
-                          <FilterPopover
-                              isActive={!!filter?.country?.length}
-                              buttonLabel="Country"
-                              SelectProps={{
-                                  labelRender: ({ value }) => (
-                                      <Space>
-                                          <ReactCountryFlag
-                                              countryCode={countryNameToCode[value] as string}
-                                              svg
-                                          />
-                                          {value}
-                                      </Space>
-                                  ),
-                              }}
-                              key="country"
-                              renederTips={renerFilter.country}
-                              optionRender={({ value }) => {
-                                console.log(value)
-                                  return (
-                                      <Space>
-                                          <ReactCountryFlag
-                                              countryCode={value as string}
-                                              svg
-                                          />
-                                          {value}
-                                      </Space>
-                                  )
-                              }}
-                              options={enums.countries.map((name, i) => {
-                                  return {
-                                      value: countryNameToCode[name],
-                                      label: name,
-                                      key: i,
-                                  }
-                              })}
-                              onApply={(option) => {
-                                  console.log(option)
-                                  if (option?.value) {
-                                      setFilters((prev) => {
-                                          const country = new Set<string>(
-                                              prev.country
-                                          ).add(option.value)
-                                          return {
-                                              ...prev,
-                                              country: Array.from(country),
-                                          }
-                                      })
-                                  }
-                              }}
-                          />
-                      </Space>
-                  </Space>
-                  <Space direction="horizontal">
-                      {ActiveGrouped.filter(Boolean).map((col, i) => (
-                          <Select
-                              key={`select-${col}-${i}`}
-                              className="min-w-2"
-                              style={{ minWidth: '120px' }} // Пример установки минимальной ширины
-                              allowClear={i > 0}
-                              onChange={(val) => {
-                                  setGroupes((prev) => [
-                                      ...prev.filter((n) => col !== n),
-                                      val,
-                                  ])
-                              }}
-                              onClear={() => {
-                                console.log('$$clear')
-                                  setGroupes((prev) =>{
-                                    console.log( prev.filter((name) => name !== col))
-                                    return prev.filter((name) => name !== col)
-                                  })
-                              }}
-                              value={col}
-                              options={groupedCols
-                                  .map(({label, value}, index) => ({
-                                      key: `option-${index}`,
-                                      label,
-                                      value,
-                                      disabled: ActiveGrouped.includes(value),
-                                  }))}
-                          />
-                      ))}
-                      <Button
-                          onClick={() => {
-                              const unused = groupedCols.filter(
-                                  ({value}) => !ActiveGrouped.includes(value)
-                              )
-                              const el = unused[0]
-                              if (!el) return
-                              setGroupes((prev) => [...prev, el.value])
-                          }}
-                          icon={<PlusCircleOutlined />}
-                      />
-                  </Space>
-                  {/* <Space direction="horizontal">
-            {ActiveGrouped.map((col, i) => (
-              <Select
-                key={i}
-                className="min-w-2"
-                allowClear={i > 0}
-                onChange={(val) => {
-                  setGroupes((prev) => [...prev.filter((n) => col !== n), val]);
-                }}
-                onClear={() => {
-                  setGroupes((prev) => prev.filter((name) => name !== col));
-                }}
-                options={groupedCols
-                  .filter((n) => !ActiveGrouped.includes(n))
-                  .map((name, i) => ({
-                    key: i,
-                    label: name,
-                    value: name,
-                    disabled: ActiveGrouped.includes(name),
-                  }))}
-              />
-            ))}
-            <Button
-              onClick={() => {
-                const unused = groupedCols.filter((name) => {
-                  return !ActiveGrouped.includes(name);
-                });
-                const el = unused[0];
-                if (!el) return;
-                setGroupes((prev) => {
-                  return [...prev, el];
-                });
-              }}
-              icon={<PlusCircleOutlined />}
-            />
-          </Space> */}
-                  <Space>
-                      {filter?.country?.map((name, i) => (
-                          <Tag
-                              onClose={() => onRemoveFilter('country', name)}
-                              key={i + 'c'}
-                              closable
-                          >
-                              <ReactCountryFlag countryCode={countryNameToCode[name]} svg />
-                          </Tag>
-                      ))}
-                      {filter?.affiliateIds?.map((name, i) => (
-                          <Tag
-                              onClose={() => onRemoveFilter('affiliateIds', name)}
-                              key={i + 'a'}
-                              closable
-                          >
-                              {name}
-                          </Tag>
-                      ))}
-                  </Space>
-              </Space>
-              <ProTable<GroupedData>
-                  // className="max-h-[200px]"
-                  actionRef={actionRef}
-                  locale={en_GB.Table}
-                  rowKey={'id'}
-                  columns={columns}
-                  request={async ({current, pageSize}, sort) => {
-                    const data = await getListReport({ input: {
-                      filter,
-                      groupBy: ActiveGrouped,
-                      offset: current && pageSize  && (current - 1) * pageSize || 0,
-                      limit: pageSize || 50,
-                      sortBy: Object.keys(sort)[0] || 'Date',
-                      sortOrder: Object.values(sort)[0]
-                    }});
+    actionRef.current?.reload();
+  }, [ActiveGrouped, Object.values(filter)]);
 
-                    return {
-                      data: data.items || [],
-                      success: true,
-                      total: data.total
-                    }
-                  }}
-                  pagination={{
-                    defaultPageSize: 50,
-                    defaultCurrent: 1
-                  }}
-                  search={false}
-                  ghost
-                  toolbar={{
-                    settings: []
-                    
-                  }}
-              />
-          </Space>
-      </Content>
-  )
+  // Используем Responsive Grid system из Ant Design для адаптации под разные экраны
+  const { useBreakpoint } = Grid;
+  const screens = useBreakpoint();
+
+  return (
+    <Content className="p-4 sm:p-6 overflow-hidden">
+      <Space direction={screens.xs ? "vertical" : "horizontal"} align="start" className="w-full">
+        <Title level={screens.xs ? 3 : 1}>Statistic</Title>
+        <Button
+          onClick={() => {
+            setFilters({
+              affiliateIds: [],
+              country: [],
+              advertiserIds: [],
+              isTest: false,
+            })
+          }}
+          icon={<ReloadOutlined />}
+        />
+      </Space>
+      <Space direction="vertical" className="w-full">
+        <DatePicker.RangePicker
+          minDate={dayjs().subtract(1, 'year')}
+          maxDate={dayjs()}
+          format={{
+            type: 'mask',
+            format: 'DD-MM-YYYY',
+          }}
+          value={[range.start, range.end]}
+          onChange={(dates, dateStrings) => {
+            setFilters((prev) => ({
+              ...prev,
+              timeframe: dates
+                ? [
+                  dates[0]?.toISOString() || '',
+                  dates[1]?.toISOString() || '',
+                ]
+                : undefined,
+            }));
+            setRange({
+              start: dates ? dates[0] : undefined,
+              end: dates ? dates[1] : undefined,
+            });
+          }}
+          className="w-full sm:w-auto"
+        />
+        <Space direction={screens.xs ? "vertical" : "horizontal"} wrap className="w-full">
+          <FilterPopover
+            isActive={!!filter?.affiliateIds?.length}
+            buttonLabel="Affiliate"
+            key="Affiliate"
+            options={enums.affiliates.map((name, i) => ({
+              value: name,
+              label: name,
+              key: i,
+            }))}
+            renederTips={renerFilter.Affiliate}
+            onApply={(option) => {
+              if (option?.value) {
+                setFilters((prev) => {
+                  const Affiliate = new Set<string>(prev.affiliateIds).add(option.value);
+                  return {
+                    ...prev,
+                    affiliateIds: Array.from(Affiliate),
+                  };
+                });
+              }
+            }}
+          />
+          <FilterPopover
+            isActive={!!filter?.country?.length}
+            buttonLabel="Country"
+            SelectProps={{
+              labelRender: ({ value }) => {
+                console.log(value)
+                return (
+                <Space key={value}>
+                  <ReactCountryFlag
+                    countryCode={value as string}
+                    svg
+                  />
+                  {value}
+                </Space>
+              )},
+            }}
+            key="country"
+            renederTips={renerFilter.country}
+            optionRender={({ value }) => (
+              <Space>
+                <ReactCountryFlag
+                  countryCode={value as string}
+                  svg
+                />
+                {value}
+              </Space>
+            )}
+            options={enums.countries.map((name, i) => {
+              return {
+                value: countryNameToCode[name],
+                label: name,
+                key: i,
+              };
+            })}
+            onApply={(option) => {
+              if (option?.value) {
+                setFilters((prev) => {
+                  const country = new Set<string>(prev.country).add(option.value);
+                  return {
+                    ...prev,
+                    country: Array.from(country),
+                  };
+                });
+              }
+            }}
+          />
+        </Space>
+        <Space direction={screens.xs ? "vertical" : "horizontal"} wrap className="w-full">
+          {ActiveGrouped.filter(Boolean).map((col, i) => (
+            <Select
+              key={`select-${col}-${i}`}
+              className="min-w-2 w-full sm:w-auto"
+              style={{ minWidth: '120px' }}
+              allowClear={i > 0}
+              onChange={(val) => {
+                setGroupes((prev) => [
+                  ...prev.filter((n) => col !== n),
+                  val,
+                ]);
+              }}
+              onClear={() => {
+                setGroupes((prev) => prev.filter((name) => name !== col));
+              }}
+              value={col}
+              options={groupedCols
+                .map(({ label, value }, index) => ({
+                  key: `option-${index}`,
+                  label,
+                  value,
+                  disabled: ActiveGrouped.includes(value),
+                }))}
+            />
+          ))}
+          <Button
+            onClick={() => {
+              const unused = groupedCols.filter(
+                ({ value }) => !ActiveGrouped.includes(value)
+              );
+              const el = unused[0];
+              if (!el) return;
+              setGroupes((prev) => [...prev, el.value]);
+            }}
+            icon={<PlusCircleOutlined />}
+            className="w-full sm:w-auto"
+          />
+        </Space>
+        <Space wrap className="w-full">
+          {filter?.country?.map((name, i) => (
+            <Tag
+              onClose={() => onRemoveFilter('country', name)}
+              key={i + 'c'}
+              closable
+            >
+              <ReactCountryFlag countryCode={countryNameToCode[name]} svg />
+            </Tag>
+          ))}
+          {filter?.affiliateIds?.map((name, i) => (
+            <Tag
+              onClose={() => onRemoveFilter('affiliateIds', name)}
+              key={i + 'a'}
+              closable
+            >
+              {name}
+            </Tag>
+          ))}
+        </Space>
+        <ProTable<GroupedData>
+          actionRef={actionRef}
+          locale={en_GB.Table}
+          rowKey={'id'}
+          columns={columns}
+          request={async ({ current, pageSize }, sort) => {
+            const data = await getListReport({
+              input: {
+                filter,
+                groupBy: ActiveGrouped,
+                offset: current && pageSize && (current - 1) * pageSize || 0,
+                limit: pageSize || 50,
+                sortBy: Object.keys(sort)[0] || 'Date',
+                sortOrder: Object.values(sort)[0]
+              }
+            });
+
+            return {
+              data: data.items || [],
+              success: true,
+              total: data.total
+            }
+          }}
+          pagination={{
+            defaultPageSize: 50,
+            defaultCurrent: 1
+          }}
+          search={false}
+          ghost
+          toolbar={{
+            settings: []
+          }}
+          tableLayout="fixed"
+          scroll={{ x: screens.xs ? 800 : undefined }}
+        />
+      </Space>
+    </Content>
+  );
 };
 
 export default Dashboard;

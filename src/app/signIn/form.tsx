@@ -14,6 +14,7 @@ export default function SignInForm({ authenticate }:{authenticate: any}) {
   return (
     <Row justify="center" align="middle" className="min-h-screen">
       <Col span={8}>
+        
         <Typography.Title level={2}>Sign in</Typography.Title>
         <Form
           name="normal_login"
