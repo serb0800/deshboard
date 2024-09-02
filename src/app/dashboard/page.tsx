@@ -30,8 +30,8 @@ const Page: NextPage<Props> = async (props) => {
             <LogoSVG />
           </div>
           <Menu
-            theme="dark"
-            mode="inline"
+
+
             defaultSelectedKeys={["1"]}
             items={[
               {

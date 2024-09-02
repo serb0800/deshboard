@@ -11,7 +11,7 @@ export async function getData(): Promise<{
   CountryList: string[];
 }> {
   const data = await fs.readFile(
-    path.resolve(process.cwd(), "src/app/data/5000_examples.json"),
+    path.resolve(process.cwd(), "data/data.json"),
     "utf-8",
   );
   const AffiliateList = new Set<string>();

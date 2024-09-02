@@ -12,8 +12,11 @@ export interface IData {
 }
 
 export interface IFilter {
-  Affiliate: string[];
-  country: string[];
+  timeframe?: [string, string]
+  isTest: boolean
+  advertiserIds?: string[];
+  affiliateIds?: string[];
+  country?: string[],
 }
 
 export type IFilterParam = { Affiliate: string[] } | { country: Country[] };
