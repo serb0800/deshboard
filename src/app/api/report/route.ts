@@ -71,7 +71,7 @@ export async function POST(req: Request) {
     acc[groupKey].TotalLeads += item.Leads;
     acc[groupKey].TotalDeposits += item.Deposits;
     acc[groupKey].ConversionRate =
-      (acc[groupKey].TotalDeposits / acc[groupKey].TotalLeads) * 100;
+    roundToTwo((acc[groupKey].TotalDeposits / acc[groupKey].TotalLeads) * 100);
 
     return acc;
   }, {} as Record<string, GroupedData>);
@@ -111,4 +111,8 @@ async function wait(min?: number, max?: number) {
   return new Promise((res, rej) => {
     return setTimeout(() => res(undefined), getRandomDelay());
   });
+}
+
+function roundToTwo(num:number) {
+  return Number(num.toFixed(2));
 }

@@ -1,24 +1,32 @@
+'use client'
 import { getData } from "@/actions/actions";
 import Dashboard from "@/components/dashboard/Dashboard";
 import { NextPage } from "next";
 import Layout, { Content } from "antd/es/layout/layout";
 import UploadOutlined from "@ant-design/icons/lib/icons/UploadOutlined";
-import VideoCameraOutlined from "@ant-design/icons/lib/icons/VideoCameraOutlined";
+
 import DashboardOutlined from "@ant-design/icons/lib/icons/DashboardOutlined";
 import Link from "antd/es/typography/Link";
 import Menu from "antd/es/menu/menu";
 import Sider from "antd/es/layout/Sider";
 import styles from "./Sider.module.css"; // Импорт CSS модуля
 import LogoSVG from "@/components/LogoSvg";
+import theme from '../../theme/themeConfig';
+import en_GB from 'antd/locale/en_GB';
+import { ConfigProvider } from "antd";
+import UserOutlined from "@ant-design/icons/lib/icons/UserOutlined";
+import SmileOutlined from "@ant-design/icons/lib/icons/SmileOutlined";
+import { SolutionOutlined } from "@ant-design/icons";
 interface Props {
   searchParams: { date?: string };
 }
 
-const Page: NextPage<Props> = async (props) => {
-  console.log(props);
-  const { data, AffiliateList, CountryList } = await getData();
+const Page: NextPage<Props> = (props) => {
   return (
     <>
+     <ConfigProvider locale={en_GB} theme={theme}>
+
+    
       <Layout className="w-full h-max">
         <Sider
           className={styles.siderCustom}
@@ -31,7 +39,7 @@ const Page: NextPage<Props> = async (props) => {
           </div>
           <Menu
 
-
+            theme="dark"
             defaultSelectedKeys={["1"]}
             items={[
               {
@@ -41,13 +49,18 @@ const Page: NextPage<Props> = async (props) => {
               },
               {
                 key: "2",
-                icon: <VideoCameraOutlined />,
-                label: "nav 2",
+                icon: <UserOutlined />,
+                label: "Affiliates",
               },
               {
                 key: "3",
-                icon: <UploadOutlined />,
-                label: "nav 3",
+                icon: <SmileOutlined />,
+                label: "Agents",
+              },
+              {
+                key: "4",
+                icon: <SolutionOutlined />,
+                label: "Utils",
               },
             ]}
           />
@@ -55,13 +68,11 @@ const Page: NextPage<Props> = async (props) => {
         <Layout>
           <Content>
             <Dashboard
-              data={data}
-              AffiliateList={AffiliateList}
-              CountryList={CountryList}
             />
           </Content>
         </Layout>
       </Layout>
+      </ConfigProvider>
     </>
   );
 };

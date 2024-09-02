@@ -90,7 +90,7 @@ const Dashboard: FC<Props> = () => {
    affiliateIds: [],
    country: [],
    isTest: false,
-   timeframe: [dayjs().subtract(1, 'month').toISOString(),dayjs().toISOString()]
+  //  timeframe: [dayjs().subtract(1, 'month').toISOString(),dayjs().toISOString()]
   });
   const renerFilter = {
     Affiliate: useCallback(
@@ -220,7 +220,7 @@ const Dashboard: FC<Props> = () => {
   return (
       <Content className="p-6 overflow-hidden">
           <Space>
-              <Title>Report Admin</Title>
+              <Title>Statistic</Title>
           </Space>
           <Space className=" w-full " direction="vertical">
               <Space direction="vertical">
