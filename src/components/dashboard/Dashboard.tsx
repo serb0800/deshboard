@@ -129,18 +129,21 @@ const Dashboard: FC<Props> = () => {
       title: "Deposits",
       dataIndex: "TotalDeposits",
       key: "TotalDeposits",
+      width: 100,
       sorter: true,
     },
     {
       title: "Leads",
       dataIndex: "TotalLeads",
       key: "TotalLeads",
+      width: 100,
       sorter: true,
     },
     {
-      title: "Conversion Rate",
+      title: "CR %",
       dataIndex: "ConversionRate",
       key: "ConversionRate",
+      width: 100,
       render: (val) => `${val}%`,
     },
   ], [ActiveGrouped]);

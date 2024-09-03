@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 
 const SignInPage: NextPage = async () => {
   const session = await auth()
-  console.log('session', session)
+
   if (session?.user?.name === 'Admin') redirect('/dashboard')
   return (
     <Content  className="w-full">

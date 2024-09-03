@@ -71,4 +71,3 @@ export default function aggregateData(data: Entry[], ...params: string[]): Aggre
   
   // Вызов функции и вывод агрегированных результатов по нескольким параметрам
   const aggregatedData = aggregateData(data, "Country", "Affiliate", "Date_UTC");
-  console.log(aggregatedData);

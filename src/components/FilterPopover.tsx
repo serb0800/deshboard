@@ -1,9 +1,7 @@
 "use client";
-import { IFilter, IFilterParam } from "@/types";
 import { Button, Popover, Select, Space } from "antd";
 import { BaseOptionType, SelectProps } from "antd/es/select";
-import React, { FC, useMemo, useState } from "react";
-import { useEffect } from "react";
+import React, { useState } from "react";
 import { ReactNode } from "react";
 import { useCallback } from "react";
 
@@ -40,9 +38,7 @@ const FilterPopover = <TOption extends BaseOptionType>({
   const onApplyHandler = useCallback(() => {
     onApply(currentOption);
   }, [currentOption]);
-  useEffect(() => {
-    console.log({ currentOption });
-  }, [currentOption]);
+ 
 
   return (
     <Popover
@@ -62,7 +58,7 @@ const FilterPopover = <TOption extends BaseOptionType>({
               options={options}
               optionRender={optionRender}
               onChange={(val, option) => {
-                console.log({ option });
+
                 setCurrent(option as TOption);
               }}
               {...SelectProps}

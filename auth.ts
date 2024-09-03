@@ -29,7 +29,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         
         if (username && password) {
           if (username === USERNAME && password === PASSWORD) {
-            console.log({ username, password })
             return { id: "00001", name: "Admin" };
           }
 
@@ -42,7 +41,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     async jwt({ token, user, account, profile, isNewUser }) {
-      console.log(user)
       if (user) {
         token.id = user.id;
       }

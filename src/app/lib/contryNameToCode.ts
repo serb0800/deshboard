@@ -12,11 +12,16 @@ export const countryNameToCode: Record<string, string> = {
     "United Kingdom": "GB",
     "Canada": "CA",
     "Australia": "AU",
-    "Philipines": "PHL",
+    "Philipines": "PH",
     "Japan": "JP",
     "India": "IN",
     "Turkey": "TR",
     "Norway": "NO",
+    "Switzerland": "CH",
+    "Germany": "DE",
+    "Russia": "RU",
+    "Italy": "IT",
+    "South Africa": "ZA",
     "Sweden": "SE",
 };
 

@@ -21,6 +21,11 @@ const countries = [
   { code: "TR", name: "Turkey", leadsMin: 63, leadsMax: 208, crMin: 4.33, crMax: 9.58 },
   { code: "NO", name: "Norway", leadsMin: 42, leadsMax: 108, crMin: 10.11, crMax: 16.25 },
   { code: "SE", name: "Sweden", leadsMin: 56, leadsMax: 89, crMin: 7.84, crMax: 17.33 },
+  { code: "CH", name: "Switzerland", leadsMin: 25, leadsMax: 57, crMin: 13.28, crMax: 18.59 },
+  { code: "DE", name: "Germany", leadsMin: 31, leadsMax: 53, crMin: 10.05, crMax: 14.22 },
+  { code: "RU", name: "Russia", leadsMin: 131, leadsMax: 285, crMin: 1.43, crMax: 3.22 },
+  { code: "IT", name: "Italy", leadsMin: 44, leadsMax: 72, crMin: 7.33, crMax: 13.11 },
+  { code: "ZA", name: "South Africa", leadsMin: 88, leadsMax: 124, crMin: 5.33, crMax: 9.83 },
 ];
 
 // Список аффилиатов
