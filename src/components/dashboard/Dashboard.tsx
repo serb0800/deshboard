@@ -20,7 +20,7 @@ import Title from "antd/es/typography/Title";
 import { getListReport, groupByKey, GroupedData } from "@/actions/request";
 import { ActionType, ProColumns, ProTable } from "@ant-design/pro-components";
 import axios from 'axios';
-import { countryNameToCode } from '@/app/lib/contryNameToCode';
+import { ContryCodeToName, countryNameToCode } from '@/app/lib/contryNameToCode';
 import { IFilter } from '@/types';
 
 interface Props {}
@@ -93,7 +93,7 @@ const Dashboard: FC<Props> = () => {
       hideInTable: !ActiveGrouped.includes('day'),
       order: ActiveGrouped.indexOf('day'),
       render: (text) => <p>{new Date(text as string).toLocaleDateString()}</p>,
-      sorter: (a, b) => Date.parse(a.Date) - Date.parse(b.Date),
+      sorter: true,
     },
     {
       title: "Country",
@@ -101,6 +101,7 @@ const Dashboard: FC<Props> = () => {
       key: "Country",
       order: ActiveGrouped.indexOf('country'),
       hideInTable: !ActiveGrouped.includes('country'),
+      sorter: true,
       render: (_, { Country }) =>
         Country && (
           <Typography.Text>
@@ -114,6 +115,7 @@ const Dashboard: FC<Props> = () => {
       order: ActiveGrouped.indexOf('affiliateId'),
       hideInTable: !ActiveGrouped.includes('affiliateId'),
       key: "Affiliate",
+      sorter: true,
     },
     {
       title: "Advertiser",
@@ -121,16 +123,19 @@ const Dashboard: FC<Props> = () => {
       hideInTable: !ActiveGrouped.includes('advertiserId'),
       order: ActiveGrouped.indexOf('advertiserId'),
       key: "Advertiser",
+      sorter: true,
     },
     {
       title: "Deposits",
       dataIndex: "TotalDeposits",
       key: "TotalDeposits",
+      sorter: true,
     },
     {
       title: "Leads",
       dataIndex: "TotalLeads",
       key: "TotalLeads",
+      sorter: true,
     },
     {
       title: "Conversion Rate",
@@ -369,7 +374,10 @@ const Dashboard: FC<Props> = () => {
                   request={async ({ current, pageSize }, sort) => {
                       const data = await getListReport({
                           input: {
-                              filter,
+                              filter: {
+                                ...filter,
+                                country: filter.country?.map((code) => ContryCodeToName[code])
+                              },
                               groupBy: ActiveGrouped,
                               offset:
                                   (current &&
@@ -398,7 +406,7 @@ const Dashboard: FC<Props> = () => {
                       settings: [],
                   }}
                   tableLayout="auto"
-                  scroll={{ x: screens.xs ? 800 : undefined }}
+                  scroll={{ x: screens.xs ? 800 : undefined, y: '80%' }}
               />
           </Space>
       </Content>

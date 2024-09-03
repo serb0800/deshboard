@@ -1,0 +1,19 @@
+.min-w-2 {
+    min-width: 200px; /* Установите минимальную ширину по вашему усмотрению */
+  }
+  
+  .selectContainer {
+    display: flex;
+    align-items: center;
+  }
+  
+  .selectContainer .ant-select {
+    flex: 1;
+  }
+  
+  .logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 0;
+  }

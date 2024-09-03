@@ -6,11 +6,15 @@ import en_GB from 'antd/locale/en_GB';
 import ru_Ru from 'antd/locale/ru_RU';
 
 import theme from '../theme/themeConfig';
+import { SessionProvider } from 'next-auth/react';
 
-const App = ({ Component, pageProps }: AppProps) => (
+const App = ({ Component, pageProps: { session, ...pageProps} }: AppProps) => (
+  <SessionProvider session={session}>
+
   <ConfigProvider locale={ru_Ru} theme={theme}>
     <Component {...pageProps} />
   </ConfigProvider>
+  </SessionProvider>
 );
 
 export default App;

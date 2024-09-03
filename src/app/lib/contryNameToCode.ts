@@ -19,3 +19,5 @@ export const countryNameToCode: Record<string, string> = {
     "Norway": "NO",
     "Sweden": "SE",
 };
+
+export const ContryCodeToName = Object.fromEntries(Object.entries(countryNameToCode).map(([key, val]) => [val, key]))

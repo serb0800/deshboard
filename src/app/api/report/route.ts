@@ -3,6 +3,7 @@ import { promises as fs } from 'fs';
 import { parseISO, format } from 'date-fns';
 import { NextResponse } from 'next/server';
 import { DataEntry, GroupedData, IReqestBody } from '@/actions/request';
+import dayjs from 'dayjs';
 
 export async function POST(req: Request) {
   // Получение данных из тела запроса
@@ -17,13 +18,14 @@ export async function POST(req: Request) {
   const data: DataEntry[] = JSON.parse(fileContents);
 
   // Фильтрация данных по параметрам
-  let filteredData = data;
+  let filteredData = data.filter((item) => new Date(item.Date_UTC).getTime() < Date.now());
 
   if (filter?.timeframe) {
     const [startTime, endTime] = filter.timeframe;
     filteredData = filteredData.filter((item) => {
       const itemDate = new Date(item.Date_UTC).getTime();
-      return itemDate >= new Date(startTime).getTime() && itemDate <= new Date(endTime).getTime();
+
+      return itemDate >= new Date(startTime).getTime() && itemDate <= new Date(endTime).getTime()+86400000;
     });
   }
 
