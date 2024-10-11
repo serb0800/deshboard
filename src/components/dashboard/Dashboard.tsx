@@ -231,11 +231,15 @@ const Dashboard: FC<Props> = () => {
                     width: 100,
                     render: (val) => `${val}%`,
                 },
-            ].map((item) => {
-                item.sortOrder =
-                    item.key === sort?.field ? sort?.order : undefined
-                return item
-            }),
+            ]
+                .map((item) => {
+                    item.sortOrder =
+                        item.key === sort?.field ? sort?.order : undefined
+                    return item
+                })
+                .sort((a, b) => {
+                    return a.order - b.order
+                }),
         [filter?.ActiveGrouped, sort]
     )
 
