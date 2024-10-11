@@ -254,7 +254,7 @@ const Dashboard: FC<Props> = () => {
     }, [filter])
 
     return (
-        <Content className="p-4 sm:p-6 overflow-hidden">
+        <Content className="p-4 sm:p-6 overflow-hidden max-h-[100vh]">
             <Title level={screens.xs ? 3 : 1}>Statistic</Title>
             <Space
                 direction={'horizontal'}
@@ -321,6 +321,9 @@ const Dashboard: FC<Props> = () => {
                     <Typography.Text strong>Filters:</Typography.Text>
                     <FilterPopover
                         isActive={!!filter?.affiliateIds?.length}
+                        disabled={
+                            !filter?.ActiveGrouped?.includes('affiliateId')
+                        }
                         buttonLabel="Affiliate"
                         key="Affiliate"
                         options={enums.affiliates.map((name, i) => ({
@@ -345,6 +348,7 @@ const Dashboard: FC<Props> = () => {
                     />
                     <FilterPopover
                         isActive={!!filter?.country?.length}
+                        disabled={!filter?.ActiveGrouped?.includes('country')}
                         buttonLabel="Country"
                         SelectProps={{
                             labelRender: ({ value }) => (
@@ -541,7 +545,7 @@ const Dashboard: FC<Props> = () => {
                         settings: [],
                     }}
                     tableLayout="auto"
-                    scroll={{ x: screens.xs ? 800 : undefined, y: '80%' }}
+                    scroll={{ x: screens.xs ? 800 : undefined, y: 450 }}
                 />
             </Space>
         </Content>
