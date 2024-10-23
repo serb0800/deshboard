@@ -117,10 +117,10 @@ const countries = [
     {
         code: 'JP',
         name: 'Japan',
-        leadsMin: 73,
-        leadsMax: 158,
-        crMin: 5.64,
-        crMax: 14.28,
+        leadsMin: 38,
+        leadsMax: 85,
+        crMin: 12.38,
+        crMax: 16.38,
     },
     {
         code: 'IN',

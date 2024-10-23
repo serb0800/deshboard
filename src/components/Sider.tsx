@@ -31,6 +31,11 @@ const Sidebar: React.FC = () => {
 
     const menuItems = [
         {
+            // key: '/',
+            icon: <DashboardOutlined />,
+            label: 'Dashboard',
+        },
+        {
             key: '/dashboard',
             icon: <DashboardOutlined />,
             label: <Link href="/dashboard">Statistic</Link>,
