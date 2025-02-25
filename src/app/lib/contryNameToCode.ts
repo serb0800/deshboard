@@ -24,6 +24,18 @@ export const countryNameToCode: Record<string, string> = {
     'South Africa': 'ZA',
     Sweden: 'SE',
     Argentina: 'AR',
+    'New Zealand': 'NZ',
+    Salvador: 'SV',
+    Honduras: 'HN',
+    Nicaragua: 'NI',
+    Chile: 'CL',
+    Paraguay: 'CY',
+    Panama: 'PA',
+    Kenya: 'KE',
+    Namibia: 'NA',
+    Botswana: 'BW',
+    Zambia: 'ZM',
+    Tanzania: 'TZ',
 }
 
 export const ContryCodeToName = Object.fromEntries(
