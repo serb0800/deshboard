@@ -370,7 +370,7 @@ function generateData() {
 
     // Даты с 17 января 2024 по 11 декабря 2024
     const startDate = new Date('2024-01-17')
-    const endDate = new Date('2024-12-11')
+    const endDate = new Date('2025-12-11')
 
     let currentDate = startDate
 
