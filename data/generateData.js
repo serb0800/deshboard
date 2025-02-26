@@ -101,10 +101,10 @@ const countries = [
     {
         code: 'AU',
         name: 'Australia',
-        leadsMin: 67,
-        leadsMax: 288,
+        leadsMin: 21,
+        leadsMax: 72,
         crMin: 7.33,
-        crMax: 16.44,
+        crMax: 16.32,
     },
     {
         code: 'PH',
