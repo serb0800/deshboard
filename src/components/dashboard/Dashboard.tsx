@@ -46,7 +46,7 @@ interface IGroupByOption {
 
 const groupedCols: IGroupByOption[] = [
     { label: 'Day', value: 'day' },
-    { label: 'Affiliate', value: 'affiliateId' },
+    { label: 'Campaigns', value: 'affiliateId' },
     { label: 'Advertiser', value: 'advertiserId' },
     { label: 'Country', value: 'country' },
 ]
@@ -193,7 +193,7 @@ const Dashboard: FC<Props> = () => {
                         ),
                 },
                 {
-                    title: 'Affiliate',
+                    title: 'Campaign',
                     dataIndex: 'Affiliate',
                     order: filter?.ActiveGrouped?.indexOf('affiliateId'),
                     hideInTable:
@@ -324,7 +324,7 @@ const Dashboard: FC<Props> = () => {
                         disabled={
                             !filter?.ActiveGrouped?.includes('affiliateId')
                         }
-                        buttonLabel="Affiliate"
+                        buttonLabel="Campaign"
                         key="Affiliate"
                         options={enums.affiliates.map((name, i) => ({
                             value: name,

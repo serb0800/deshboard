@@ -41,9 +41,9 @@ const Sidebar: React.FC = () => {
             label: <Link href="/dashboard">Statistic</Link>,
         },
         {
-            key: '/affiliates',
+            key: '/campaigns',
             icon: <UserOutlined />,
-            label: <Link href="/affiliates">Affiliates</Link>,
+            label: <Link href="/campaigns">Campaigns</Link>,
         },
         {
             key: '/agents',
