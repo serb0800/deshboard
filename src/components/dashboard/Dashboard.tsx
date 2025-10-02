@@ -4,6 +4,7 @@ import {
     CloseOutlined,
     PlusCircleOutlined,
     ReloadOutlined,
+    SyncOutlined,
 } from '@ant-design/icons'
 import {
     Button,
@@ -16,7 +17,7 @@ import {
     Flex,
 } from 'antd'
 import { Content } from 'antd/es/layout/layout'
-import dayjs, { Dayjs } from 'dayjs'
+import dayjs from 'dayjs'
 import React, {
     FC,
     Ref,
@@ -35,7 +36,7 @@ import axios from 'axios'
 import { ContryCodeToName, countryNameToCode } from '@/app/lib/contryNameToCode'
 import { IFilter } from '@/types'
 import useTableState from './useTableState'
-import { it } from 'node:test'
+import { useReportData } from '@/hooks/useDataFetch'
 
 interface Props {}
 
@@ -65,13 +66,8 @@ const Dashboard: FC<Props> = () => {
         affiliates: [],
         countries: [],
     })
-    const [range, setRange] = useState<{
-        start: Dayjs | undefined | null
-        end: Dayjs | undefined | null
-    }>({
-        start: undefined,
-        end: undefined,
-    })
+    const [autoRefresh, setAutoRefresh] = useState(false)
+    const [refreshInterval, setRefreshInterval] = useState(30000) // 30 seconds
     // const [filter, setFilters] = useState<IFilter>({ advertiserIds: [], affiliateIds: [], country: [], isTest: false });
     const screens = Grid.useBreakpoint()
 
@@ -85,7 +81,7 @@ const Dashboard: FC<Props> = () => {
     const [
         { data, isLoading },
         { filter, columnsState, sort, pagination },
-        { setFilters, onChangeTable, setColumnState },
+        { setFilters, onChangeTable, setColumnState, reload },
     ] = useTableState<GroupedData>({
         key: 'deshboard',
         defaultValue: {
@@ -123,42 +119,76 @@ const Dashboard: FC<Props> = () => {
         },
     })
 
+    // Additional data fetching hook for refresh functionality
+    const { isRefreshing, lastUpdated } = useReportData(
+        {
+            filter: {
+                ...filter,
+                country: filter?.country?.map(
+                    (code: string) => ContryCodeToName[code]
+                ),
+                isTest: false,
+            },
+            groupBy: filter?.ActiveGrouped || ['day', 'affiliateId', 'country'],
+            offset:
+                (pagination.current &&
+                    pagination.pageSize &&
+                    (pagination.current - 1) * pagination.pageSize) ||
+                0,
+            limit: pagination.pageSize || 50,
+            sortBy: (sort?.field as keyof GroupedData) || 'Date',
+            sortOrder: sort?.order ? sort.order : null,
+        },
+        {
+            autoRefresh,
+            refreshInterval,
+            onSuccess: () => {
+                // Trigger table reload when data is refreshed
+                reload()
+            },
+        }
+    )
+
+    const onRemoveFilter = useCallback(
+        (object: keyof IFilter, removeVal: string) => {
+            setFilters((prev) => ({
+                ...prev,
+                [object]: prev?.[object]?.filter(
+                    (val: string) => val !== removeVal
+                ),
+            }))
+        },
+        [setFilters]
+    )
+
     const renerFilter = {
         Affiliate: useCallback(
             () =>
-                filter!.affiliateIds?.map((name) => (
+                filter?.affiliateIds?.map((name: string, index: number) => (
                     <Tag
+                        key={`affiliate-${index}`}
                         closable
                         onClose={() => onRemoveFilter('affiliateIds', name)}
                     >
                         {name}
                     </Tag>
                 )),
-            [filter!.affiliateIds]
+            [filter?.affiliateIds, onRemoveFilter]
         ),
         country: useCallback(
             () =>
-                filter.country?.map((name) => (
+                filter?.country?.map((name: string, index: number) => (
                     <Tag
+                        key={`country-${index}`}
                         closable
                         onClose={() => onRemoveFilter('country', name)}
                     >
                         <ReactCountryFlag svg countryCode={name} />
                     </Tag>
                 )),
-            [filter.country]
+            [filter?.country, onRemoveFilter]
         ),
     }
-
-    const onRemoveFilter = useCallback(
-        (object: keyof IFilter, removeVal: string) => {
-            setFilters((prev) => ({
-                ...prev,
-                [object]: prev![object]?.filter((val) => val !== removeVal),
-            }))
-        },
-        []
-    )
 
     const columns: ProColumns<GroupedData>[] = useMemo(
         () =>
@@ -169,7 +199,7 @@ const Dashboard: FC<Props> = () => {
                     key: 'Date',
                     hideInTable: !filter?.ActiveGrouped?.includes('day'),
                     order: filter?.ActiveGrouped?.indexOf('day'),
-                    render: (text) => (
+                    render: (text: React.ReactNode) => (
                         <p>{new Date(text as string).toLocaleDateString()}</p>
                     ),
                     sorter: true,
@@ -181,7 +211,10 @@ const Dashboard: FC<Props> = () => {
                     order: filter?.ActiveGrouped?.indexOf('country'),
                     hideInTable: !filter?.ActiveGrouped?.includes('country'),
                     sorter: true,
-                    render: (_, { Country }) =>
+                    render: (
+                        _: React.ReactNode,
+                        { Country }: { Country: string }
+                    ) =>
                         Country && (
                             <Typography.Text>
                                 <ReactCountryFlag
@@ -229,11 +262,11 @@ const Dashboard: FC<Props> = () => {
                     dataIndex: 'ConversionRate',
                     key: 'ConversionRate',
                     width: 100,
-                    render: (val) => `${val}%`,
+                    render: (val: React.ReactNode) => `${val}%`,
                 },
             ]
                 .map((item) => {
-                    item.sortOrder =
+                    ;(item as any).sortOrder =
                         item.key === sort?.field ? sort?.order : undefined
                     return item
                 })
@@ -255,7 +288,14 @@ const Dashboard: FC<Props> = () => {
 
     return (
         <Content className="p-4 sm:p-6 overflow-hidden max-h-[100vh]">
-            <Title level={screens.xs ? 3 : 1}>Statistic</Title>
+            <div className="flex justify-between items-center mb-4">
+                <Title level={screens.xs ? 3 : 1}>Statistic</Title>
+                {lastUpdated && (
+                    <Typography.Text type="secondary" className="text-sm">
+                        Last update: {lastUpdated.toLocaleTimeString()}
+                    </Typography.Text>
+                )}
+            </div>
             <Space
                 direction={'horizontal'}
                 size="middle"
@@ -284,16 +324,11 @@ const Dashboard: FC<Props> = () => {
                                   ]
                                 : undefined,
                         }))
-                        setRange({
-                            start: dates ? dates[0] : undefined,
-                            end: dates ? dates[1] : undefined,
-                        })
                     }}
                     className="w-full sm:w-auto"
                 />
                 <Button
                     onClick={() => {
-                        setRange({ end: undefined, start: undefined })
                         setFilters({
                             affiliateIds: [],
                             country: [],
@@ -303,8 +338,45 @@ const Dashboard: FC<Props> = () => {
                         })
                     }}
                     disabled={disableFilter}
+                    color="danger"
                     icon={<ReloadOutlined />}
-                />
+                >
+                    Reset Settings
+                </Button>
+                <Button
+                    onClick={() => reload()}
+                    loading={isRefreshing}
+                    icon={<SyncOutlined spin={isRefreshing} />}
+                    title="Update data"
+                >
+                    Update
+                </Button>
+                {/* <Button
+                    type={autoRefresh ? 'primary' : 'default'}
+                    onClick={() => setAutoRefresh(!autoRefresh)}
+                    title={
+                        autoRefresh
+                            ? 'Disable auto refresh'
+                            : 'Enable auto refresh'
+                    }
+                >
+                    {autoRefresh ? 'Auto refresh: ON' : 'Auto refresh: OFF'}
+                </Button> */}
+                {autoRefresh && (
+                    <Select
+                        value={refreshInterval}
+                        onChange={setRefreshInterval}
+                        style={{ width: 120 }}
+                        options={[
+                            { label: '10 сек', value: 10000 },
+                            { label: '30 сек', value: 30000 },
+                            { label: '1 мин', value: 60000 },
+                            { label: '5 мин', value: 300000 },
+                            { label: '10 мин', value: 600000 },
+                        ]}
+                        title="Интервал автообновления"
+                    />
+                )}
             </Space>
             <Space rootClassName="mt-4" direction="vertical" className="w-full">
                 <Space
@@ -336,7 +408,7 @@ const Dashboard: FC<Props> = () => {
                             if (option?.value) {
                                 setFilters((prev) => {
                                     const Affiliate = new Set<string>(
-                                        prev.affiliateIds
+                                        prev?.affiliateIds || []
                                     ).add(option.value)
                                     return {
                                         ...prev,
@@ -381,7 +453,7 @@ const Dashboard: FC<Props> = () => {
                             if (option?.value) {
                                 setFilters((prev) => {
                                     const country = new Set<string>(
-                                        prev.country
+                                        prev?.country || []
                                     ).add(option.value)
                                     return {
                                         ...prev,
@@ -404,81 +476,81 @@ const Dashboard: FC<Props> = () => {
                     size="middle"
                 >
                     <Typography.Text strong>Group by:</Typography.Text>
-                    {filter?.ActiveGrouped?.filter(Boolean).map((col, i) => (
-                        <Flex align="center" key={`select-${col}-${i}`}>
-                            <Select
-                                key={`select-${col}-${i}`}
-                                className="min-w-2 w-full sm:w-auto"
-                                style={{ minWidth: '120px' }}
-                                allowClear={i > 0}
-                                onChange={(val) => {
-                                    setFilters((prev) => {
-                                        const current = col
-
-                                        return {
-                                            ...prev,
-                                            ActiveGrouped: [
-                                                ...prev?.ActiveGrouped.map(
-                                                    (n) => {
-                                                        return col === n
-                                                            ? val
-                                                            : n
-                                                    }
+                    {filter?.ActiveGrouped?.filter(Boolean).map(
+                        (col: string, i: number) => (
+                            <Flex align="center" key={`select-${col}-${i}`}>
+                                <Select
+                                    key={`select-${col}-${i}`}
+                                    className="min-w-2 w-full sm:w-auto"
+                                    style={{ minWidth: '120px' }}
+                                    allowClear={i > 0}
+                                    onChange={(val: string) => {
+                                        setFilters((prev) => {
+                                            return {
+                                                ...prev,
+                                                ActiveGrouped: [
+                                                    ...(prev?.ActiveGrouped?.map(
+                                                        (n: string) => {
+                                                            return col === n
+                                                                ? val
+                                                                : n
+                                                        }
+                                                    ) || []),
+                                                ],
+                                            }
+                                        })
+                                    }}
+                                    onClear={() => {
+                                        setFilters((prev) => {
+                                            return {
+                                                ...prev,
+                                                ActiveGrouped:
+                                                    prev?.ActiveGrouped?.filter(
+                                                        (name: string) =>
+                                                            name !== col
+                                                    ) || [],
+                                            }
+                                        })
+                                    }}
+                                    value={col}
+                                    options={groupedCols.map(
+                                        ({ label, value }, index) => ({
+                                            key: `option-${index}`,
+                                            label,
+                                            value,
+                                            disabled:
+                                                filter?.ActiveGrouped?.includes(
+                                                    value
                                                 ),
-                                            ],
-                                        }
-                                    })
-                                }}
-                                onClear={() => {
-                                    setFilters((prev) => {
-                                        return {
-                                            ...prev,
-                                            ActiveGrouped:
-                                                prev?.ActiveGrouped.filter(
-                                                    (name: string) =>
-                                                        name !== col
-                                                ),
-                                        }
-                                    })
-                                }}
-                                value={col}
-                                options={groupedCols.map(
-                                    ({ label, value }, index) => ({
-                                        key: `option-${index}`,
-                                        label,
-                                        value,
-                                        disabled:
-                                            filter?.ActiveGrouped?.includes(
-                                                value
-                                            ),
-                                    })
-                                )}
-                            />
-                            <Button
-                                type="text"
-                                size="small"
-                                className="ml-1"
-                                onClick={() => {
-                                    setFilters((prev) => {
-                                        return {
-                                            ...prev,
-                                            ActiveGrouped:
-                                                prev?.ActiveGrouped.filter(
-                                                    (name: string) =>
-                                                        name !== col
-                                                ),
-                                        }
-                                    })
-                                }}
-                                icon={
-                                    <CloseOutlined
-                                        size={4}
-                                        style={{ color: 'red' }}
-                                    />
-                                }
-                            />
-                        </Flex>
-                    ))}
+                                        })
+                                    )}
+                                />
+                                <Button
+                                    type="text"
+                                    size="small"
+                                    className="ml-1"
+                                    onClick={() => {
+                                        setFilters((prev) => {
+                                            return {
+                                                ...prev,
+                                                ActiveGrouped:
+                                                    prev?.ActiveGrouped?.filter(
+                                                        (name: string) =>
+                                                            name !== col
+                                                    ) || [],
+                                            }
+                                        })
+                                    }}
+                                    icon={
+                                        <CloseOutlined
+                                            size={4}
+                                            style={{ color: 'red' }}
+                                        />
+                                    }
+                                />
+                            </Flex>
+                        )
+                    )}
                     <Button
                         onClick={() => {
                             const unused = groupedCols.filter(
@@ -491,7 +563,7 @@ const Dashboard: FC<Props> = () => {
                                 return {
                                     ...prev,
                                     ActiveGrouped: [
-                                        ...prev?.ActiveGrouped,
+                                        ...(prev?.ActiveGrouped || []),
                                         el.value,
                                     ],
                                 }
@@ -502,7 +574,7 @@ const Dashboard: FC<Props> = () => {
                     />
                 </Space>
                 <Space wrap className="w-full">
-                    {filter?.country?.map((name, i) => (
+                    {filter?.country?.map((name: string, i: number) => (
                         <Tag
                             onClose={() => onRemoveFilter('country', name)}
                             key={i + 'c'}
@@ -511,7 +583,7 @@ const Dashboard: FC<Props> = () => {
                             <ReactCountryFlag countryCode={name} svg />
                         </Tag>
                     ))}
-                    {filter?.affiliateIds?.map((name, i) => (
+                    {filter?.affiliateIds?.map((name: string, i: number) => (
                         <Tag
                             onClose={() => onRemoveFilter('affiliateIds', name)}
                             key={i + 'a'}
@@ -527,7 +599,7 @@ const Dashboard: FC<Props> = () => {
                     rowKey={'id'}
                     columns={columns}
                     dataSource={data}
-                    loading={isLoading}
+                    loading={isLoading || isRefreshing}
                     columnsState={{
                         onChange: setColumnState,
                         value: columnsState,
