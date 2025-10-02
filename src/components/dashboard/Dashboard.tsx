@@ -119,36 +119,6 @@ const Dashboard: FC<Props> = () => {
         },
     })
 
-    // Additional data fetching hook for refresh functionality
-    const { isRefreshing, lastUpdated } = useReportData(
-        {
-            filter: {
-                ...filter,
-                country: filter?.country?.map(
-                    (code: string) => ContryCodeToName[code]
-                ),
-                isTest: false,
-            },
-            groupBy: filter?.ActiveGrouped || ['day', 'affiliateId', 'country'],
-            offset:
-                (pagination.current &&
-                    pagination.pageSize &&
-                    (pagination.current - 1) * pagination.pageSize) ||
-                0,
-            limit: pagination.pageSize || 50,
-            sortBy: (sort?.field as keyof GroupedData) || 'Date',
-            sortOrder: sort?.order ? sort.order : null,
-        },
-        {
-            autoRefresh,
-            refreshInterval,
-            onSuccess: () => {
-                // Trigger table reload when data is refreshed
-                reload()
-            },
-        }
-    )
-
     const onRemoveFilter = useCallback(
         (object: keyof IFilter, removeVal: string) => {
             setFilters((prev) => ({
@@ -266,7 +236,7 @@ const Dashboard: FC<Props> = () => {
                 },
             ]
                 .map((item) => {
-                    ;(item as any).sortOrder =
+                    item.sortOrder =
                         item.key === sort?.field ? sort?.order : undefined
                     return item
                 })
@@ -290,11 +260,6 @@ const Dashboard: FC<Props> = () => {
         <Content className="p-4 sm:p-6 overflow-hidden max-h-[100vh]">
             <div className="flex justify-between items-center mb-4">
                 <Title level={screens.xs ? 3 : 1}>Statistic</Title>
-                {lastUpdated && (
-                    <Typography.Text type="secondary" className="text-sm">
-                        Last update: {lastUpdated.toLocaleTimeString()}
-                    </Typography.Text>
-                )}
             </div>
             <Space
                 direction={'horizontal'}
@@ -345,8 +310,8 @@ const Dashboard: FC<Props> = () => {
                 </Button>
                 <Button
                     onClick={() => reload()}
-                    loading={isRefreshing}
-                    icon={<SyncOutlined spin={isRefreshing} />}
+                    loading={isLoading}
+                    icon={<SyncOutlined spin={isLoading} />}
                     title="Update data"
                 >
                     Update
@@ -362,21 +327,6 @@ const Dashboard: FC<Props> = () => {
                 >
                     {autoRefresh ? 'Auto refresh: ON' : 'Auto refresh: OFF'}
                 </Button> */}
-                {autoRefresh && (
-                    <Select
-                        value={refreshInterval}
-                        onChange={setRefreshInterval}
-                        style={{ width: 120 }}
-                        options={[
-                            { label: '10 сек', value: 10000 },
-                            { label: '30 сек', value: 30000 },
-                            { label: '1 мин', value: 60000 },
-                            { label: '5 мин', value: 300000 },
-                            { label: '10 мин', value: 600000 },
-                        ]}
-                        title="Интервал автообновления"
-                    />
-                )}
             </Space>
             <Space rootClassName="mt-4" direction="vertical" className="w-full">
                 <Space
@@ -599,7 +549,7 @@ const Dashboard: FC<Props> = () => {
                     rowKey={'id'}
                     columns={columns}
                     dataSource={data}
-                    loading={isLoading || isRefreshing}
+                    loading={isLoading}
                     columnsState={{
                         onChange: setColumnState,
                         value: columnsState,
