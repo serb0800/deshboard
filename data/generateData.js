@@ -101,9 +101,9 @@ const countries = [
     {
         code: 'AU',
         name: 'Australia',
-        leadsMin: 21,
-        leadsMax: 72,
-        crMin: 7.33,
+        leadsMin: 33,
+        leadsMax: 78,
+        crMin: 11.47,
         crMax: 16.32,
     },
     {
@@ -119,7 +119,7 @@ const countries = [
         name: 'Japan',
         leadsMin: 18,
         leadsMax: 62,
-        crMin: 5.64,
+        crMin: 9.95,
         crMax: 14.28,
     },
     {
@@ -243,7 +243,7 @@ const countries = [
         crMax: 5.85,
     },
     {
-        code: 'CY',
+        code: 'PY',
         name: 'Paraguay',
         leadsMin: 47,
         leadsMax: 86,
@@ -310,31 +310,31 @@ const countries = [
 
 // Список аффилиатов
 const affiliates = [
-    'LMLI 23',
-    'LMLI 24',
-    'LMLI 25',
-    'LMLI 26',
-    'LMLI 27',
-    'LMLI 28',
-    'LMLI 29',
-    'LMLI 30',
-    'LMLI 31',
-    'LMLI 32',
-    'LMLI 33',
-    'LMLI 34',
-    'LMLI 35',
-    'LMLI 36',
-    'LMLI 37',
-    'LMLI 38',
-    'LMLI 39',
-    'LMLI 40',
-    'LMLI 41',
-    'LMLI 42',
-    'LMLI 43',
-    'LMLI 44',
-    'LMLI 45',
-    'LMLI 46',
-    'LMLI 47',
+    '429031',
+    '429805',
+    '429671',
+    '429142',
+    '429356',
+    '429789',
+    '429234',
+    '429567',
+    '429890',
+    '429123',
+    '429456',
+    '429789',
+    '429012',
+    '429345',
+    '429678',
+    '429901',
+    '429234',
+    '429567',
+    '429890',
+    '429123',
+    '429456',
+    '429789',
+    '429012',
+    '429345',
+    '429678',
 ]
 
 // Список рекламодателей
@@ -368,34 +368,64 @@ function getRandomInRange(min, max) {
 function generateData() {
     const data = []
 
-    // Даты с 17 января 2024 по 11 декабря 2024
+    // Даты с 17 января 2024 по 11 декабря 2025
     const startDate = new Date('2024-01-17')
     const endDate = new Date('2025-12-11')
 
     let currentDate = startDate
 
     while (currentDate <= endDate) {
-        countries.forEach((country) => {
-            const leads = getRandomInRange(country.leadsMin, country.leadsMax)
-            const cr = (
-                Math.random() * (country.crMax - country.crMin) +
-                country.crMin
-            ).toFixed(2)
-            const deposits = Math.floor(leads * (cr / 100))
+        // От 1 до 3 аффилиатов в день
+        const numAffiliates = getRandomInRange(1, 3)
+        const selectedAffiliates = []
+        
+        // Выбираем случайных аффилиатов
+        for (let i = 0; i < numAffiliates; i++) {
+            let affiliate
+            do {
+                affiliate = affiliates[getRandomInRange(0, affiliates.length - 1)]
+            } while (selectedAffiliates.includes(affiliate))
+            selectedAffiliates.push(affiliate)
+        }
 
-            const record = {
-                Country: country.name,
-                Affiliate:
-                    affiliates[getRandomInRange(0, affiliates.length - 1)],
-                Advertiser:
-                    advertisers[getRandomInRange(0, advertisers.length - 1)],
-                Date_UTC: currentDate.toISOString(),
-                Leads: leads,
-                Deposits: deposits,
-                Conversion_Rate: cr,
+        // Для каждого выбранного аффилиата
+        selectedAffiliates.forEach((affiliate) => {
+            // От 1 до 3 рекламодателей на аффилиата
+            const numAdvertisers = getRandomInRange(1, 3)
+            const selectedAdvertisers = []
+            
+            // Выбираем случайных рекламодателей
+            for (let i = 0; i < numAdvertisers; i++) {
+                let advertiser
+                do {
+                    advertiser = advertisers[getRandomInRange(0, advertisers.length - 1)]
+                } while (selectedAdvertisers.includes(advertiser))
+                selectedAdvertisers.push(advertiser)
             }
 
-            data.push(record)
+            // Для каждого выбранного рекламодателя генерируем данные по странам
+            selectedAdvertisers.forEach((advertiser) => {
+                countries.forEach((country) => {
+                    const leads = getRandomInRange(country.leadsMin, country.leadsMax)
+                    const cr = (
+                        Math.random() * (country.crMax - country.crMin) +
+                        country.crMin
+                    ).toFixed(2)
+                    const deposits = Math.floor(leads * (cr / 100))
+
+                    const record = {
+                        Country: country.name,
+                        Affiliate: affiliate,
+                        Advertiser: advertiser,
+                        Date_UTC: currentDate.toISOString(),
+                        Leads: leads,
+                        Deposits: deposits,
+                        Conversion_Rate: cr,
+                    }
+
+                    data.push(record)
+                })
+            })
         })
 
         // Переход к следующему дню
