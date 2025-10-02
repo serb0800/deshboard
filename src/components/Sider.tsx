@@ -56,7 +56,7 @@ const Sidebar: React.FC = () => {
             label: <Link href="/utils">Utils</Link>,
         },
         {
-            key: 'logout',
+            // key: 'logout',
             icon: <LogoutOutlined />,
             label: (
                 <Link role="button" rel="" onClick={handleLogout} href={''}>
