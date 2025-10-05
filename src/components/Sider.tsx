@@ -8,6 +8,11 @@ import {
     SmileOutlined,
     SolutionOutlined,
     LogoutOutlined,
+    TeamOutlined,
+    UsergroupAddOutlined,
+    ContactsOutlined,
+    ApiOutlined,
+    SettingOutlined,
 } from '@ant-design/icons'
 import Link from 'next/link'
 import Sider from 'antd/es/layout/Sider'
@@ -31,7 +36,7 @@ const Sidebar: React.FC = () => {
 
     const menuItems = [
         {
-            // key: '/',
+            key: 'dashboard',
             icon: <DashboardOutlined />,
             label: 'Dashboard',
         },
@@ -51,12 +56,37 @@ const Sidebar: React.FC = () => {
             label: <Link href="/agents">Agents</Link>,
         },
         {
-            // key: '/utils',
+            key: 'utils',
             icon: <SolutionOutlined />,
-            label: <Link href="/utils">Utils</Link>,
+            label: 'Utils',
         },
         {
-            // key: 'logout',
+            key: 'affiliates',
+            icon: <TeamOutlined />,
+            label: 'Affiliates',
+        },
+        {
+            key: 'employees',
+            icon: <UsergroupAddOutlined />,
+            label: 'Employees',
+        },
+        {
+            key: 'leads',
+            icon: <ContactsOutlined />,
+            label: 'Leads',
+        },
+        {
+            key: 'integrations',
+            icon: <ApiOutlined />,
+            label: 'Integrations',
+        },
+        {
+            key: 'system-settings',
+            icon: <SettingOutlined />,
+            label: 'System Settings',
+        },
+        {
+            key: 'logout',
             icon: <LogoutOutlined />,
             label: (
                 <Link role="button" rel="" onClick={handleLogout} href={''}>
