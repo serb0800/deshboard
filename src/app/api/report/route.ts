@@ -59,7 +59,8 @@ export async function POST(req: Request) {
 
     if (!acc[groupKey]) {
       acc[groupKey] = {
-        id: `${index}_${groupKey}`,
+        // id: `${index}_${groupKey}`,
+        id: item.id as string,
         Date: dateKey,
         Country: countryKey,
         Affiliate: affiliateKey,

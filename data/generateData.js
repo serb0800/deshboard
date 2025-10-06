@@ -368,6 +368,11 @@ function getRandomInRange(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min
 }
 
+// Функция для генерации уникального ID
+function generateUniqueId() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2)
+}
+
 /**
  * АЛГОРИТМ РАСПРЕДЕЛЕНИЯ ЛИДОВ:
  * 
@@ -519,6 +524,7 @@ function generateData() {
                     
                     // 11. Создаем запись с распределенными данными
                     const record = {
+                        id: generateUniqueId(),
                         Country: country.name,
                         Affiliate: affiliate,
                         Advertiser: advertiser,

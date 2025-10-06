@@ -3,6 +3,7 @@ import { SortOrder } from 'antd/es/table/interface';
 import axios from 'axios'
 
 export interface DataEntry {
+    id: string;
     Country: string;
     Affiliate: string;
     Advertiser: string;

@@ -169,8 +169,10 @@ const Dashboard: FC<Props> = () => {
                     key: 'Date',
                     hideInTable: !filter?.ActiveGrouped?.includes('day'),
                     order: filter?.ActiveGrouped?.indexOf('day'),
-                    render: (text: React.ReactNode) => (
-                        <p>{new Date(text as string).toLocaleDateString()}</p>
+                    render: (text: React.ReactNode, item: GroupedData) => (
+                        <p data-id={item?.id}>
+                            {new Date(text as string).toLocaleDateString()}
+                        </p>
                     ),
                     sorter: true,
                 },
