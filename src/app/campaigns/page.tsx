@@ -12,7 +12,7 @@ interface Props {
     searchParams: { date?: string }
 }
 
-const Page: NextPage<Props> = (props) => {
+const Page: NextPage<Props> = async (props) => {
     return (
         <>
             <ConfigProvider locale={en_GB} theme={theme}>
