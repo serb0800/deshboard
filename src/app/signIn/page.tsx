@@ -11,8 +11,7 @@ export const metadata = {
 }
 const SignInPage: NextPage = async () => {
     const session = await auth()
-
-    if (session?.user?.name === 'Admin') redirect('/statistic')
+    if (session?.user?.name) redirect('/statistic')
     return (
         <Content className="w-full">
             <SignInForm authenticate={authenticate} />;

@@ -5,9 +5,6 @@ import { auth } from '../../auth'
 import { redirect } from 'next/navigation'
 
 const RootLayout = async ({ children, ...props }: React.PropsWithChildren) => {
-    const session = await auth()
-
-    if (session?.user?.name !== 'Admin') redirect('/signIn')
     return (
         <html lang="en">
             <body className=" w-[100vw]">
