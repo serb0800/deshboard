@@ -502,13 +502,33 @@ function generateData() {
                     })
                 })
                 
-                // Распределяем депозиты пропорционально лидам между рекламодателями
+                // Случайное распределение депозитов с учетом весов (количество лидов)
                 let remainingAffiliateDeposits = affiliateDeposits
+
+                // Создаем массив весов на основе количества лидов
+                const weights = advertiserLeadsInfo.map(info => info.leads)
+                const totalWeight = weights.reduce((sum, weight) => sum + weight, 0)
+
                 advertiserLeadsInfo.forEach((info, index) => {
-                    const proportion = info.leads / affiliateLeads
-                    const advertiserDeposits = index === advertiserLeadsInfo.length - 1 
-                        ? remainingAffiliateDeposits // Последний рекламодатель получает все оставшиеся депозиты
-                        : Math.round(affiliateDeposits * proportion)
+                    let advertiserDeposits
+                    
+                    if (index === advertiserLeadsInfo.length - 1) {
+                        // Последний рекламодатель получает все оставшиеся депозиты
+                        advertiserDeposits = remainingAffiliateDeposits
+                    } else {
+                        // Вычисляем базовую долю на основе веса
+                        const baseProportion = info.leads / totalWeight
+                        const baseDeposits = Math.floor(affiliateDeposits * baseProportion)
+                        
+                        // Добавляем случайное отклонение от -20% до +20%
+                        const randomFactor = 0.8 + Math.random() * 0.4 // от 0.8 до 1.2
+                        const maxDeposits = Math.max(1, remainingAffiliateDeposits - (advertiserLeadsInfo.length - index - 1))
+                        
+                        advertiserDeposits = Math.min(
+                            Math.max(1, Math.floor(baseDeposits * randomFactor)),
+                            maxDeposits
+                        )
+                    }
                     
                     remainingAffiliateDeposits -= advertiserDeposits
                     info.deposits = advertiserDeposits
