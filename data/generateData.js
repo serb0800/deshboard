@@ -430,21 +430,32 @@ function generateData() {
                 selectedAffiliates.push(affiliate)
             }
 
-            // 5. Распределяем общие лиды между выбранными аффилиатами
-            const leadsPerAffiliate = Math.floor(totalLeadsForCountry / numAffiliates)
-            const remainingLeads = totalLeadsForCountry - (leadsPerAffiliate * numAffiliates)
-            
-            // 6. Собираем информацию о лидах для пропорционального распределения депозитов
+            // 5. Случайно распределяем общие лиды между выбранными аффилиатами
             const affiliateLeadsInfo = []
-            
+            let remainingLeads = totalLeadsForCountry
+
+            // Создаем массив весов для случайного распределения
+            const affiliateWeights = selectedAffiliates.map(() => Math.random())
+
             selectedAffiliates.forEach((affiliate, affiliateIndex) => {
-                // Каждый аффилиат получает базовое количество лидов + возможный остаток
-                let affiliateLeads = leadsPerAffiliate
-                if (affiliateIndex === 0) {
-                    affiliateLeads += remainingLeads // Остаток отдаем первому аффилиату
+                let affiliateLeads
+                
+                if (affiliateIndex === selectedAffiliates.length - 1) {
+                    // Последний аффилиат получает все оставшиеся лиды
+                    affiliateLeads = Math.max(0, remainingLeads)
+                } else {
+                    // Случайное распределение на основе весов
+                    const totalWeight = affiliateWeights.reduce((sum, weight) => sum + weight, 0)
+                    const proportion = affiliateWeights[affiliateIndex] / totalWeight
+                    const maxLeads = Math.max(1, remainingLeads - (selectedAffiliates.length - affiliateIndex - 1))
+                    
+                    affiliateLeads = Math.min(
+                        Math.max(1, Math.floor(totalLeadsForCountry * proportion)),
+                        maxLeads
+                    )
                 }
                 
-                // Сохраняем информацию о лидах аффилиата
+                remainingLeads -= affiliateLeads
                 affiliateLeadsInfo.push({
                     affiliate: affiliate,
                     leads: affiliateLeads
@@ -572,7 +583,7 @@ function generateData() {
 // Генерация данных и запись их в файл
 const generatedData = generateData()
 fs.writeFileSync(
-    './data/generated_data.json',
+    './data/data.json',
     JSON.stringify(generatedData, null, 2)
 )
 
