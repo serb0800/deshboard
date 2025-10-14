@@ -398,7 +398,7 @@ function generateData() {
 
     // Даты с 17 января 2024 по 11 декабря 2025
     const startDate = new Date('2024-01-17')
-    const endDate = new Date('2025-12-11')
+    const endDate = new Date('2026-12-11')
 
     let currentDate = startDate
 
@@ -514,7 +514,7 @@ function generateData() {
                     
                     if (index === advertiserLeadsInfo.length - 1) {
                         // Последний рекламодатель получает все оставшиеся депозиты
-                        advertiserDeposits = remainingAffiliateDeposits
+                        advertiserDeposits = Math.max(0, remainingAffiliateDeposits)
                     } else {
                         // Вычисляем базовую долю на основе веса
                         const baseProportion = info.leads / totalWeight
@@ -528,6 +528,9 @@ function generateData() {
                             Math.max(1, Math.floor(baseDeposits * randomFactor)),
                             maxDeposits
                         )
+                        
+                        // Дополнительная защита от отрицательных значений
+                        advertiserDeposits = Math.max(0, advertiserDeposits)
                     }
                     
                     remainingAffiliateDeposits -= advertiserDeposits
