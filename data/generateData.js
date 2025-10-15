@@ -444,101 +444,59 @@ function generateData() {
                 }
             }
 
-            // Теперь обрабатываем каждого аффилиата
-            connections.forEach((connection) => {
-                const affiliate = connection.affiliate
-                const advertiser = connection.advertiser
-
-                // 7. Для каждого аффилиата выбираем от 1 до 3 рекламодателей
-                const numAdvertisers = getRandomInRange(1, 3)
-                const selectedAdvertisers = []
+            // 5. Распределяем лиды и депозиты между связками
+            let remainingLeads = totalLeadsForCountry
+            let remainingDeposits = totalDepositsForCountry
+            
+            // Создаем веса для случайного распределения
+            const connectionWeights = connections.map(() => Math.random())
+            const totalWeight = connectionWeights.reduce((sum, weight) => sum + weight, 0)
+            
+            connections.forEach((connection, index) => {
+                let connectionLeads, connectionDeposits
                 
-                // Выбираем случайных рекламодателей (без повторений)
-                for (let i = 0; i < numAdvertisers; i++) {
-                    let advertiser
-                    do {
-                        advertiser = advertisers[getRandomInRange(0, advertisers.length - 1)]
-                    } while (selectedAdvertisers.includes(advertiser))
-                    selectedAdvertisers.push(advertiser)
+                if (index === connections.length - 1) {
+                    // Последняя связка получает все оставшиеся лиды и депозиты
+                    connectionLeads = Math.max(0, remainingLeads)
+                    connectionDeposits = Math.max(0, remainingDeposits)
+                } else {
+                    // Случайное распределение на основе весов
+                    const proportion = connectionWeights[index] / totalWeight
+                    
+                    // Распределяем лиды
+                    const maxLeads = Math.max(1, remainingLeads - (connections.length - index - 1))
+                    connectionLeads = Math.min(
+                        Math.max(1, Math.floor(totalLeadsForCountry * proportion)),
+                        maxLeads
+                    )
+                    
+                    // Распределяем депозиты
+                    const maxDeposits = Math.max(1, remainingDeposits - (connections.length - index - 1))
+                    connectionDeposits = Math.min(
+                        Math.max(1, Math.floor(totalDepositsForCountry * proportion)),
+                        maxDeposits
+                    )
+                }
+                
+                remainingLeads -= connectionLeads
+                remainingDeposits -= connectionDeposits
+                
+                // 6. Пересчитываем CR для конкретной записи
+                const actualCR = connectionLeads > 0 ? (connectionDeposits / connectionLeads * 100).toFixed(2) : "0.00"
+                
+                // 7. Создаем запись с данными связки
+                const record = {
+                    id: generateUniqueId(),
+                    Country: country.name,
+                    Affiliate: connection.affiliate,
+                    Advertiser: connection.advertiser,
+                    Date_UTC: currentDate.toISOString(),
+                    Leads: connectionLeads,
+                    Deposits: connectionDeposits,
+                    Conversion_Rate: actualCR,
                 }
 
-                // 8. Собираем информацию о лидах для пропорционального распределения депозитов между рекламодателями
-                const advertiserLeadsInfo = []
-                
-                // Распределяем лиды между рекламодателями
-                const leadsPerAdvertiser = Math.floor(affiliateLeads / numAdvertisers)
-                const remainingAffiliateLeads = affiliateLeads - (leadsPerAdvertiser * numAdvertisers)
-                
-                selectedAdvertisers.forEach((advertiser, advertiserIndex) => {
-                    // Каждый рекламодатель получает базовое количество лидов + возможный остаток
-                    let advertiserLeads = leadsPerAdvertiser
-                    if (advertiserIndex === 0) {
-                        advertiserLeads += remainingAffiliateLeads // Остаток отдаем первому рекламодателю
-                    }
-                    
-                    advertiserLeadsInfo.push({
-                        advertiser: advertiser,
-                        leads: advertiserLeads
-                    })
-                })
-                
-                // Случайное распределение депозитов с учетом весов (количество лидов)
-                let remainingAffiliateDeposits = affiliateDeposits
-
-                // Создаем массив весов на основе количества лидов
-                const weights = advertiserLeadsInfo.map(info => info.leads)
-                const totalWeight = weights.reduce((sum, weight) => sum + weight, 0)
-
-                advertiserLeadsInfo.forEach((info, index) => {
-                    let advertiserDeposits
-                    
-                    if (index === advertiserLeadsInfo.length - 1) {
-                        // Последний рекламодатель получает все оставшиеся депозиты
-                        advertiserDeposits = Math.max(0, remainingAffiliateDeposits)
-                    } else {
-                        // Вычисляем базовую долю на основе веса
-                        const baseProportion = info.leads / totalWeight
-                        const baseDeposits = Math.floor(affiliateDeposits * baseProportion)
-                        
-                        // Добавляем случайное отклонение от -20% до +20%
-                        const randomFactor = 0.8 + Math.random() * 0.4 // от 0.8 до 1.2
-                        const maxDeposits = Math.max(1, remainingAffiliateDeposits - (advertiserLeadsInfo.length - index - 1))
-                        
-                        advertiserDeposits = Math.min(
-                            Math.max(1, Math.floor(baseDeposits * randomFactor)),
-                            maxDeposits
-                        )
-                        
-                        // Дополнительная защита от отрицательных значений
-                        advertiserDeposits = Math.max(0, advertiserDeposits)
-                    }
-                    
-                    remainingAffiliateDeposits -= advertiserDeposits
-                    info.deposits = advertiserDeposits
-                })
-
-                advertiserLeadsInfo.forEach((advertiserInfo) => {
-                    const advertiser = advertiserInfo.advertiser
-                    const advertiserLeads = advertiserInfo.leads
-                    const advertiserDeposits = advertiserInfo.deposits
-
-                    // 10. Пересчитываем CR для конкретной записи на основе фактических лидов и депозитов
-                    const actualCR = advertiserLeads > 0 ? (advertiserDeposits / advertiserLeads * 100).toFixed(2) : "0.00"
-                    
-                    // 11. Создаем запись с распределенными данными
-                    const record = {
-                        id: generateUniqueId(),
-                        Country: country.name,
-                        Affiliate: affiliate,
-                        Advertiser: advertiser,
-                        Date_UTC: currentDate.toISOString(),
-                        Leads: advertiserLeads,
-                        Deposits: advertiserDeposits,
-                        Conversion_Rate: actualCR,
-                    }
-
-                    data.push(record)
-                })
+                data.push(record)
             })
         })
 
