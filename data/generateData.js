@@ -417,68 +417,37 @@ function generateData() {
             // 3. Рассчитываем общее количество депозитов для страны с точностью до целого
             const totalDepositsForCountry = Math.round(totalLeadsForCountry * (countryCR / 100))
             
-            // 4. Выбираем от 1 до 3 аффилиатов для работы в этой стране
-            const numAffiliates = getRandomInRange(1, 3)
-            const selectedAffiliates = []
+            // 4. Создаем случайные связки аффилиат-рекламодатель
+            const numConnections = getRandomInRange(1, 3) // 1-3 связки в стране в день
+            const connections = []
             
-            // Выбираем случайных аффилиатов (без повторений)
-            for (let i = 0; i < numAffiliates; i++) {
-                let affiliate
-                do {
-                    affiliate = affiliates[getRandomInRange(0, affiliates.length - 1)]
-                } while (selectedAffiliates.includes(affiliate))
-                selectedAffiliates.push(affiliate)
+            for (let i = 0; i < numConnections; i++) {
+                // Выбираем случайного аффилиата
+                const affiliate = affiliates[getRandomInRange(0, affiliates.length - 1)]
+                
+                // Выбираем случайного рекламодателя
+                const advertiser = advertisers[getRandomInRange(0, advertisers.length - 1)]
+                
+                // Проверяем, что такая связка еще не существует
+                const connectionExists = connections.some(conn => 
+                    conn.affiliate === affiliate && conn.advertiser === advertiser
+                )
+                
+                if (!connectionExists) {
+                    connections.push({
+                        affiliate: affiliate,
+                        advertiser: advertiser
+                    })
+                } else {
+                    // Если связка уже существует, уменьшаем счетчик
+                    i--
+                }
             }
 
-            // 5. Случайно распределяем общие лиды между выбранными аффилиатами
-            const affiliateLeadsInfo = []
-            let remainingLeads = totalLeadsForCountry
-
-            // Создаем массив весов для случайного распределения
-            const affiliateWeights = selectedAffiliates.map(() => Math.random())
-
-            selectedAffiliates.forEach((affiliate, affiliateIndex) => {
-                let affiliateLeads
-                
-                if (affiliateIndex === selectedAffiliates.length - 1) {
-                    // Последний аффилиат получает все оставшиеся лиды
-                    affiliateLeads = Math.max(0, remainingLeads)
-                } else {
-                    // Случайное распределение на основе весов
-                    const totalWeight = affiliateWeights.reduce((sum, weight) => sum + weight, 0)
-                    const proportion = affiliateWeights[affiliateIndex] / totalWeight
-                    const maxLeads = Math.max(1, remainingLeads - (selectedAffiliates.length - affiliateIndex - 1))
-                    
-                    affiliateLeads = Math.min(
-                        Math.max(1, Math.floor(totalLeadsForCountry * proportion)),
-                        maxLeads
-                    )
-                }
-                
-                remainingLeads -= affiliateLeads
-                affiliateLeadsInfo.push({
-                    affiliate: affiliate,
-                    leads: affiliateLeads
-                })
-            })
-            
-            // Распределяем депозиты пропорционально лидам
-            let remainingDeposits = totalDepositsForCountry
-            affiliateLeadsInfo.forEach((info, index) => {
-                const proportion = info.leads / totalLeadsForCountry
-                const affiliateDeposits = index === affiliateLeadsInfo.length - 1 
-                    ? remainingDeposits // Последний аффилиат получает все оставшиеся депозиты
-                    : Math.round(totalDepositsForCountry * proportion)
-                
-                remainingDeposits -= affiliateDeposits
-                info.deposits = affiliateDeposits
-            })
-            
             // Теперь обрабатываем каждого аффилиата
-            affiliateLeadsInfo.forEach((affiliateInfo) => {
-                const affiliate = affiliateInfo.affiliate
-                const affiliateLeads = affiliateInfo.leads
-                const affiliateDeposits = affiliateInfo.deposits
+            connections.forEach((connection) => {
+                const affiliate = connection.affiliate
+                const advertiser = connection.advertiser
 
                 // 7. Для каждого аффилиата выбираем от 1 до 3 рекламодателей
                 const numAdvertisers = getRandomInRange(1, 3)
